@@ -88,4 +88,8 @@ public class User {
     public String getName() {
         return this.name;
     }
+
+    public void addComment(int commentID) {
+        this.comments.add(commentID);
+    }
 }

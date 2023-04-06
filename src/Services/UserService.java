@@ -12,6 +12,10 @@ public class UserService extends Service<User> {
         this.current_user = -1;
     }
 
+    public int getCurrentUserID() {
+        return this.current_user;
+    }
+
     public void register(User newUser) {
         for (User user: this.itemHashMap.values()) {
             if (newUser.equals(user)) {
@@ -40,14 +44,48 @@ public class UserService extends Service<User> {
         System.out.println("There is no user with these credentials.");
     }
 
-    public void logout() {
+    private User getCurrentUser() {
         if (this.current_user == -1) {
+            return null;
+        }
+
+        return this.get(this.current_user);
+    }
+
+    public void logout() {
+        User user = this.getCurrentUser();
+
+        if (user == null) {
             System.out.println("No user is logged in.");
             return;
         }
 
-        User user = this.get(this.current_user);
+        current_user = -1;
         System.out.println("Goodbye, " + user.getName() + "!");
+    }
+
+    public void deleteAccount() {
+        User user = this.getCurrentUser();
+
+        if (user == null) {
+            System.out.println("No user is logged in.");
+            return;
+        }
+
+        String name = user.getName();
+
+        this.remove(this.current_user);
+        current_user = -1;
+        System.out.println("Goodbye forever, " + name + "!");
+    }
+
+    public void sendComment(int commentID) {
+        User user = this.getCurrentUser();
+        if (user == null) {
+            return;
+        }
+
+        user.addComment(commentID);
     }
 
 }

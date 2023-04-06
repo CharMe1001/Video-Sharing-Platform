@@ -6,8 +6,22 @@ import Post.Short;
 import java.util.Scanner;
 
 public class PostService extends Service<Post> {
+    private int currentPost;
+
     public PostService() {
         super();
+    }
+
+    public int getCurrentPostID() {
+        return this.currentPost;
+    }
+
+    private Post getCurrentPost() {
+        if (this.currentPost == -1) {
+            return null;
+        }
+
+        return this.get(this.currentPost);
     }
 
     public String getPostData(int id) {
@@ -29,7 +43,7 @@ public class PostService extends Service<Post> {
         return ret.toString();
     }
 
-    public void read(Scanner sc) {
+    public int read(Scanner sc) {
         Post post;
 
         int type = 6;
@@ -70,6 +84,34 @@ public class PostService extends Service<Post> {
 
         post.read(sc);
 
-        this.add(post);
+        return this.add(post);
+    }
+
+    public void openPost(int postID) {
+        Post post = this.get(postID);
+        if (post == null) {
+            System.out.println("The post with id " + postID + " doesn't exist.");
+            return;
+        }
+
+        System.out.println("Opened post with id " + postID + ".");
+        this.currentPost = postID;
+    }
+
+    public void closePost() {
+        if (this.currentPost != -1) {
+            System.out.println("Closed post with id " + this.currentPost + ".");
+        }
+        this.currentPost = -1;
+    }
+
+    public void addComment(int commentID) {
+        Post post = this.getCurrentPost();
+        if (!(post instanceof UserPost)) {
+            System.out.println("No post that you can comment on is currently opened.");
+            return;
+        }
+
+        ((UserPost) post).addComment(commentID);
     }
 }

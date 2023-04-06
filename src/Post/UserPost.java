@@ -42,4 +42,8 @@ public class UserPost extends Post {
 
         return ret;
     }
+
+    public void addComment(int commentID) {
+        this.comments.add(commentID);
+    }
 }

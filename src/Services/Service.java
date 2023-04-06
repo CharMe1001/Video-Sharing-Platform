@@ -16,8 +16,11 @@ public class Service<T> {
         return id;
     }
 
-    public void add(T item) {
-        this.itemHashMap.put(this.generateID(), item);
+    public int add(T item) {
+        int id = this.generateID();
+        this.itemHashMap.put(id, item);
+
+        return id;
     }
 
     public void remove(int id) {
