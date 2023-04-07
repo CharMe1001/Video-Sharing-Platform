@@ -4,18 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="61dfc136-7d83-4f99-8ee4-645679704a94" name="Changes" comment="Implemented user account creation">
-      <change afterPath="$PROJECT_DIR$/src/Services/CommentService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/StateManager/StateManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/StateManager/States.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/User/Comment.java" afterDir="false" />
+    <list default="true" id="61dfc136-7d83-4f99-8ee4-645679704a94" name="Changes" comment="Implemented comment functionality and a basic finite state machine for menu-ing.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Post/CommunityPost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/CommunityPost.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Post/Poll.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/Poll.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Post/Post.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/Post.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Post/Short.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/Short.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Post/UserPost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/UserPost.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Post/Video.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/Video.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Services/CommentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/CommentService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Services/PostService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/PostService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Services/Service.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/Service.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/User/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/User/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/StateManager/States.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/StateManager/States.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,7 +78,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1680723473277</updated>
-      <workItem from="1680723474641" duration="23302000" />
+      <workItem from="1680723474641" duration="29316000" />
     </task>
     <task id="LOCAL-00001" summary="Start">
       <created>1680723633193</created>
@@ -101,7 +101,14 @@
       <option name="project" value="LOCAL" />
       <updated>1680783007313</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Implemented comment functionality and a basic finite state machine for menu-ing.">
+      <created>1680812018019</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1680812018019</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -111,6 +118,7 @@
     <MESSAGE value="Start" />
     <MESSAGE value="Implemented post functionality" />
     <MESSAGE value="Implemented user account creation" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implemented user account creation" />
+    <MESSAGE value="Implemented comment functionality and a basic finite state machine for menu-ing." />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented comment functionality and a basic finite state machine for menu-ing." />
   </component>
 </project>

@@ -11,9 +11,15 @@ public class Video extends UserPost {
         this.source = "";
         this.length = 0.0;
     }
+    
+    public Video(int posterID) {
+        super(posterID);
+        this.source = "";
+        this.length = 0.0;
+    }
 
-    public Video(int poster_id, String name, String thumbnail, String source, double length) {
-        super(poster_id, name, thumbnail);
+    public Video(int posterID, String name, String thumbnail, String source, double length) {
+        super(posterID, name, thumbnail);
         this.source = source;
         this.length = length;
     }

@@ -1,6 +1,7 @@
 package Post;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 
@@ -14,8 +15,14 @@ public class Poll extends UserPost {
         this.options = new ArrayList<>();
     }
 
-    public Poll(int poster_id, String name, String text, List<String> options) {
-        super(poster_id, name, null);
+    public Poll(int posterID) {
+        super(posterID);
+        this.text = "";
+        this.options = new ArrayList<>();
+    }
+
+    public Poll(int posterID, String name, String text, List<String> options) {
+        super(posterID, name, null);
         this.text = text;
         this.options = options;
     }
@@ -25,11 +32,7 @@ public class Poll extends UserPost {
         System.out.print("Input name: ");
         this.name = sc.nextLine();
 
-        System.out.print("Input the id of the poster: ");
-        this.poster_id = sc.nextInt();
-        sc.nextLine();
-
-        this.likes = 0;
+        this.likes = new HashSet<>();
         this.comments = new ArrayList<>();
 
         System.out.print("Input poll text: ");

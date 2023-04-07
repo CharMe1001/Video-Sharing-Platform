@@ -1,5 +1,7 @@
 package Post;
 
+import User.Comment;
+
 import java.util.Scanner;
 
 public class CommunityPost extends UserPost {
@@ -10,8 +12,13 @@ public class CommunityPost extends UserPost {
         this.text = "";
     }
 
-    public CommunityPost(int poster_id, String name, String thumbnail, String text) {
-        super(poster_id, name, thumbnail);
+    public CommunityPost(int posterID) {
+        super(posterID);
+        this.text = "";
+    }
+
+    public CommunityPost(int posterID, String name, String thumbnail, String text) {
+        super(posterID, name, thumbnail);
         this.text = text;
     }
 

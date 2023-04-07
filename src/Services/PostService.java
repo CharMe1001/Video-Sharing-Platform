@@ -2,7 +2,9 @@ package Services;
 
 import Post.*;
 import Post.Short;
+import User.Comment;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class PostService extends Service<Post> {
@@ -24,26 +26,26 @@ public class PostService extends Service<Post> {
         return this.get(this.currentPost);
     }
 
-    public String getPostData(int id) {
+    public String getPostName(int id) {
         Post post = this.get(id);
         if (post == null) {
             return "Post with id " + id + " doesn't exist.";
         }
 
-        return post.toString();
+        return post.getName();
     }
 
     public String toString() {
         StringBuilder ret = new StringBuilder("Posts:\n");
 
         for (int id: this.itemHashMap.keySet()) {
-            ret.append("---------------").append(id).append("---------------\n").append(this.getPostData(id));
+            ret.append("---------------").append(id).append("---------------\n").append(this.getPostName(id));
         }
 
         return ret.toString();
     }
 
-    public int read(Scanner sc) {
+    public int read(Scanner sc, int userID) {
         Post post;
 
         int type = 6;
@@ -66,19 +68,19 @@ public class PostService extends Service<Post> {
                 break;
             }
             case 2: {
-                post = new Poll();
+                post = new Poll(userID);
                 break;
             }
             case 3: {
-                post = new CommunityPost();
+                post = new CommunityPost(userID);
                 break;
             }
             case 4: {
-                post = new Short();
+                post = new Short(userID);
                 break;
             }
             default: {
-                post = new Video();
+                post = new Video(userID);
             }
         }
 
@@ -94,7 +96,8 @@ public class PostService extends Service<Post> {
             return;
         }
 
-        System.out.println("Opened post with id " + postID + ".");
+        System.out.println("-------------" + postID + "-------------");
+        System.out.println(post);
         this.currentPost = postID;
     }
 
@@ -113,5 +116,35 @@ public class PostService extends Service<Post> {
         }
 
         ((UserPost) post).addComment(commentID);
+    }
+
+    public List<Integer> getCommentIDs() {
+        Post post = this.getCurrentPost();
+        if (!(post instanceof  UserPost)) {
+            System.out.println("No post that you can comment on is currently opened.");
+            return null;
+        }
+
+        return ((UserPost) post).getComments();
+    }
+
+    public void addLike(int userID) {
+        Post post = this.getCurrentPost();
+        if (!(post instanceof UserPost)) {
+            System.out.println("No post that you can like is currently opened.");
+            return;
+        }
+
+        ((UserPost) post).addLike(userID);
+    }
+
+    public void addDislike(int userID) {
+        Post post = this.getCurrentPost();
+        if (!(post instanceof UserPost)) {
+            System.out.println("No post that you can dislike is currently opened.");
+            return;
+        }
+
+        ((UserPost) post).addDislike(userID);
     }
 }

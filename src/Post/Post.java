@@ -21,7 +21,7 @@ public class Post {
         this.name = sc.nextLine();
 
         System.out.print("Input thumbnail file: ");
-        this.thumbnail = sc.next();
+        this.thumbnail = sc.nextLine();
     }
 
     public String toString() {
@@ -32,5 +32,9 @@ public class Post {
         }
 
         return ret;
+    }
+
+    public String getName() {
+        return this.name;
     }
 }

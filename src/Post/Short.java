@@ -12,8 +12,14 @@ public class Short extends UserPost {
         this.length = 0.0;
     }
 
-    public Short(int poster_id, String name, String thumbnail, String source, double length) {
-        super(poster_id, name, thumbnail);
+    public Short(int posterID) {
+        super(posterID);
+        this.source = "";
+        this.length = 0.0;
+    }
+
+    public Short(int posterID, String name, String thumbnail, String source, double length) {
+        super(posterID, name, thumbnail);
         this.source = source;
         this.length = length;
     }
