@@ -2,7 +2,6 @@ package Services;
 
 import Post.*;
 import Post.Short;
-import User.Comment;
 
 import java.util.List;
 import java.util.Scanner;
@@ -48,7 +47,7 @@ public class PostService extends Service<Post> {
     public int read(Scanner sc, int userID) {
         Post post;
 
-        int type = 6;
+        int type;
         while (true) {
             System.out.print("Input type of post (1 - Ad, 2 - Poll, 3 - Community Post, 4 - Short, 5 - Video): ");
             type = sc.nextInt();
@@ -89,16 +88,30 @@ public class PostService extends Service<Post> {
         return this.add(post);
     }
 
-    public void openPost(int postID) {
+    public void showPosts(List<Integer> postIDs) {
+        if (postIDs == null) {
+            return;
+        }
+
+        for (int postID:postIDs) {
+            Post post = this.get(postID);
+
+            System.out.println("--------------" + postID + "--------------\n" + post.getName());
+        }
+    }
+
+    public boolean openPost(int postID) {
         Post post = this.get(postID);
         if (post == null) {
             System.out.println("The post with id " + postID + " doesn't exist.");
-            return;
+            return false;
         }
 
         System.out.println("-------------" + postID + "-------------");
         System.out.println(post);
         this.currentPost = postID;
+
+        return true;
     }
 
     public void closePost() {
@@ -121,11 +134,20 @@ public class PostService extends Service<Post> {
     public List<Integer> getCommentIDs() {
         Post post = this.getCurrentPost();
         if (!(post instanceof  UserPost)) {
-            System.out.println("No post that you can comment on is currently opened.");
             return null;
         }
 
         return ((UserPost) post).getComments();
+    }
+
+    public int getPosterID(int postID) {
+        Post post = this.get(postID);
+        if (!(post instanceof UserPost)) {
+            System.out.println("No post that you can comment on is currently opened.");
+            return -1;
+        }
+
+        return ((UserPost) post).getPosterID();
     }
 
     public void addLike(int userID) {

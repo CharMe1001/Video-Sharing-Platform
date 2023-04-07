@@ -1,7 +1,5 @@
 package Post;
 
-import User.Comment;
-
 import java.util.Scanner;
 
 public class CommunityPost extends UserPost {

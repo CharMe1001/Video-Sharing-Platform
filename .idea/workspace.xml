@@ -4,18 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="61dfc136-7d83-4f99-8ee4-645679704a94" name="Changes" comment="Implemented comment functionality and a basic finite state machine for menu-ing.">
+    <list default="true" id="61dfc136-7d83-4f99-8ee4-645679704a94" name="Changes" comment="Progress on state service.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Post/CommunityPost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/CommunityPost.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Post/Poll.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/Poll.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Post/Post.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/Post.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Post/Short.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/Short.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Post/UserPost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/UserPost.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Post/Video.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Post/Video.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Services/CommentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/CommentService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Services/PostService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/PostService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/UserService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/StateManager/States.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/StateManager/States.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/User/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/User/User.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,6 +29,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/User/User.java" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -78,7 +77,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1680723473277</updated>
-      <workItem from="1680723474641" duration="29316000" />
+      <workItem from="1680723474641" duration="40281000" />
     </task>
     <task id="LOCAL-00001" summary="Start">
       <created>1680723633193</created>
@@ -108,7 +107,14 @@
       <option name="project" value="LOCAL" />
       <updated>1680812018019</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Progress on state service.">
+      <created>1680855013570</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1680855013570</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -119,6 +125,7 @@
     <MESSAGE value="Implemented post functionality" />
     <MESSAGE value="Implemented user account creation" />
     <MESSAGE value="Implemented comment functionality and a basic finite state machine for menu-ing." />
-    <option name="LAST_COMMIT_MESSAGE" value="Implemented comment functionality and a basic finite state machine for menu-ing." />
+    <MESSAGE value="Progress on state service." />
+    <option name="LAST_COMMIT_MESSAGE" value="Progress on state service." />
   </component>
 </project>

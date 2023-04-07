@@ -77,4 +77,8 @@ public class UserPost extends Post {
     public List<Integer> getComments() {
         return new ArrayList<>(this.comments);
     }
+
+    public int getPosterID() {
+        return this.posterID;
+    }
 }

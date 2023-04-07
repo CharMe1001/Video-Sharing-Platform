@@ -1,8 +1,6 @@
 package User;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class User {
     private String name;
@@ -10,7 +8,7 @@ public class User {
     private String email;
 
     private int cnt_subscribers;
-    private List<Integer> subscribed_to;
+    private Set<Integer> subscribed_to;
 
     private List<Integer> comments;
 
@@ -26,7 +24,7 @@ public class User {
         this.email = "";
         this.cnt_subscribers = 0;
 
-        this.subscribed_to = new ArrayList<>();
+        this.subscribed_to = new HashSet<>();
         this.comments = new ArrayList<>();
         this.history = new ArrayList<>();
         this.posts = new ArrayList<>();
@@ -39,7 +37,7 @@ public class User {
         this.email = email;
         this.cnt_subscribers = 0;
 
-        this.subscribed_to = new ArrayList<>();
+        this.subscribed_to = new HashSet<>();
         this.comments = new ArrayList<>();
         this.history = new ArrayList<>();
         this.posts = new ArrayList<>();
@@ -58,7 +56,7 @@ public class User {
 
         this.cnt_subscribers = 0;
 
-        this.subscribed_to = new ArrayList<>();
+        this.subscribed_to = new HashSet<>();
         this.comments = new ArrayList<>();
         this.history = new ArrayList<>();
         this.posts = new ArrayList<>();
@@ -89,7 +87,44 @@ public class User {
         return this.name;
     }
 
+    public List<Integer> getPosts() {
+        return new ArrayList<>(this.posts);
+    }
+
+    public List<Integer> getHistory() {
+        return new ArrayList<>(this.history);
+    }
+
     public void addComment(int commentID) {
         this.comments.add(commentID);
+    }
+
+    public void addToHistory(int postID) {
+        this.history.add(postID);
+    }
+
+    public void addToPosts(int postID) {
+        this.posts.add(postID);
+    }
+
+    public void addToPlaylists(int playlistID) {
+        this.playlists.add(playlistID);
+    }
+
+    public boolean addToSubscribed(int userID) {
+        if (this.subscribed_to.contains(userID)) {
+            this.subscribed_to.remove(userID);
+            return false;
+        }
+        this.subscribed_to.add(userID);
+        return true;
+    }
+
+    public void addSubscriber() {
+        ++this.cnt_subscribers;
+    }
+
+    public void removeSubscriber() {
+        --this.cnt_subscribers;
     }
 }

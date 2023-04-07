@@ -2,6 +2,7 @@ package Services;
 
 import User.User;
 
+import java.util.List;
 import java.util.Map;
 
 public class UserService extends Service<User> {
@@ -52,6 +53,23 @@ public class UserService extends Service<User> {
         return this.get(this.current_user);
     }
 
+    public List<Integer> getPosts() {
+        User user = this.getCurrentUser();
+        if (user == null) {
+            return null;
+        }
+
+        return user.getPosts();
+    }
+
+    public List<Integer> getHistory() {User user = this.getCurrentUser();
+        if (user == null) {
+            return null;
+        }
+
+        return user.getHistory();
+    }
+
     public void logout() {
         User user = this.getCurrentUser();
 
@@ -86,6 +104,59 @@ public class UserService extends Service<User> {
         }
 
         user.addComment(commentID);
+    }
+
+    public void addToHistory(int postID) {
+        User user = this.getCurrentUser();
+        if (user == null) {
+            return;
+        }
+
+        user.addToHistory(postID);
+    }
+
+    public void addToPosts(int postID) {
+        User user = this.getCurrentUser();
+        if (user == null) {
+            return;
+        }
+
+        user.addToPosts(postID);
+    }
+
+    public void subscribe(int userID) {
+        if (userID == this.current_user) {
+            System.out.println("You cannot subscribe to yourself.");
+            return;
+        }
+
+        User you = this.getCurrentUser();
+        User them = this.get(userID);
+
+        if (you == null || them == null) {
+            System.out.println("Something went wrong retrieving user data.");
+            return;
+        }
+
+        if (you.addToSubscribed(userID)) {
+            them.addSubscriber();
+        } else {
+            them.removeSubscriber();
+        }
+    }
+
+    public void addToPlaylist(int playlistID) {
+        User user = this.getCurrentUser();
+        if (user == null) {
+            System.out.println("There is no user logged in.");
+            return;
+        }
+
+        user.addToPlaylists(playlistID);
+    }
+
+    public void showData() {
+        System.out.println(this.getCurrentUser());
     }
 
 }
