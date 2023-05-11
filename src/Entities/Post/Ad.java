@@ -1,5 +1,7 @@
-package Post;
+package Entities.Post;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Ad extends Post {
@@ -21,7 +23,6 @@ public class Ad extends Post {
         this.text = text;
     }
 
-    @Override
     public void read(Scanner sc) {
         super.read(sc);
 
@@ -29,7 +30,7 @@ public class Ad extends Post {
         this.companyName = sc.nextLine();
 
         System.out.print("Input the link of the ad: ");
-        this.link = sc.next();
+        this.link = sc.nextLine();
 
         System.out.print("Input the ad text: ");
         this.text = sc.nextLine();
@@ -42,5 +43,25 @@ public class Ad extends Post {
         ret += ("Content: " + this.text + "\n");
 
         return ret;
+    }
+
+    public String getColumns() {
+        return super.getColumns() + ", companyName, link, text";
+    }
+
+    public String toSQLInsert(String className) {
+        return super.toSQLInsert(className) + ", '" + this.companyName + "', '" + this.link + "', '" + this.text + "')";
+    }
+
+    public String getSQLUpdate(String className) {
+        return super.getSQLUpdate(className) + ", companyName = '" + this.companyName + "', link = '" + this.link + "', text = '" + this.text + "'";
+    }
+
+    protected void getDataFromSelect(ResultSet src) throws SQLException {
+        super.getDataFromSelect(src);
+
+        this.companyName = src.getString("companyName");
+        this.link = src.getString("link");
+        this.text = src.getString("text");
     }
 }

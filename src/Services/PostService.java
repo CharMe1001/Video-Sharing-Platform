@@ -1,31 +1,50 @@
 package Services;
 
-import Post.*;
-import Post.Short;
+import Entities.BaseEntity;
+import Entities.Post.*;
+import Entities.Post.Short;
 
+import java.lang.reflect.InvocationTargetException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class PostService extends Service<Post> {
-    private int currentPost;
+    private static PostService instance = null;
+    public static PostService getInstance() {
+        if (PostService.instance == null) {
+            PostService.instance = new PostService();
+        }
 
-    public PostService() {
-        super();
+        return PostService.instance;
     }
 
-    public int getCurrentPostID() {
+    private Integer currentPost;
+
+    private PostService() {
+        this.currentPost = null;
+    }
+
+    public void setCurrentPostID(Integer id) {
+        this.currentPost = id;
+    }
+
+    public Integer getCurrentPostID() {
         return this.currentPost;
     }
 
-    private Post getCurrentPost() {
-        if (this.currentPost == -1) {
+    private Post getCurrentPost() throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        if (this.currentPost == null) {
             return null;
         }
 
         return this.get(this.currentPost);
     }
 
-    public String getPostName(int id) {
+    public String getPostName(Integer id) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Post post = this.get(id);
         if (post == null) {
             return "Post with id " + id + " doesn't exist.";
@@ -34,22 +53,61 @@ public class PostService extends Service<Post> {
         return post.getName();
     }
 
-    public String toString() {
-        StringBuilder ret = new StringBuilder("Posts:\n");
+    private void getPollOptions(Poll poll) throws SQLException {
+        String getOptions = "SELECT * FROM OPTIONS WHERE pollID = " + poll.getID();
+        Statement stmt = Service.connection.createStatement();
+        ResultSet options = stmt.executeQuery(getOptions);
 
-        for (int id: this.itemHashMap.keySet()) {
-            ret.append("---------------").append(id).append("---------------\n").append(this.getPostName(id));
-        }
-
-        return ret.toString();
+        poll.getOptionsFromResult(options);
     }
 
-    public int read(Scanner sc, int userID) {
+    public Post get(Integer id) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Post post = super.get(id);
+
+        if (post instanceof Poll) {
+            this.getPollOptions((Poll) post);
+        }
+
+        return post;
+    }
+
+    public List<Post> getAll() throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        List<Post> posts = super.getAll();
+        for (Post post: posts) {
+            if (post instanceof Poll) {
+                this.getPollOptions((Poll) post);
+            }
+        }
+
+        return posts;
+    }
+
+    public List<Post> getAllFromUser(Integer posterID) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        String sqlGet = "SELECT * FROM POST WHERE posterID = " + posterID;
+        Statement userStmt = Service.connection.createStatement();
+        ResultSet res = userStmt.executeQuery(sqlGet);
+
+        List<Post> posts = new ArrayList<>();
+
+        while (res.next()) {
+            Post post = (Post)BaseEntity.getFromSelect(res);
+
+            if (post instanceof Poll) {
+                this.getPollOptions((Poll) post);
+            }
+
+            posts.add(post);
+        }
+
+        return posts;
+    }
+
+    public int read(Scanner sc, int userID) throws SQLException {
         Post post;
 
         int type;
         while (true) {
-            System.out.print("Input type of post (1 - Ad, 2 - Poll, 3 - Community Post, 4 - Short, 5 - Video): ");
+            System.out.print("Input type of post (1 - Ad, 2 - Poll, 3 - Post, 4 - Short, 5 - Video): ");
             type = sc.nextInt();
             sc.nextLine();
 
@@ -62,111 +120,34 @@ public class PostService extends Service<Post> {
         }
 
         switch (type) {
-            case 1: {
+            case 1 -> {
                 post = new Ad();
-                break;
             }
-            case 2: {
+            case 2 -> {
                 post = new Poll(userID);
-                break;
             }
-            case 3: {
+            case 3 -> {
                 post = new CommunityPost(userID);
-                break;
             }
-            case 4: {
+            case 4 -> {
                 post = new Short(userID);
-                break;
             }
-            default: {
+            default -> {
                 post = new Video(userID);
             }
         }
 
         post.read(sc);
 
-        return this.add(post);
-    }
+        post = this.add(post);
 
-    public void showPosts(List<Integer> postIDs) {
-        if (postIDs == null) {
-            return;
+        if (post instanceof Poll) {
+            String sqlOptions = ((Poll) post).toSQLInsertOptions();
+            System.out.println(sqlOptions);
+            Statement stmt = Service.connection.createStatement();
+            stmt.executeUpdate(sqlOptions);
         }
 
-        for (int postID:postIDs) {
-            Post post = this.get(postID);
-
-            System.out.println("--------------" + postID + "--------------\n" + post.getName());
-        }
-    }
-
-    public boolean openPost(int postID) {
-        Post post = this.get(postID);
-        if (post == null) {
-            System.out.println("The post with id " + postID + " doesn't exist.");
-            return false;
-        }
-
-        System.out.println("-------------" + postID + "-------------");
-        System.out.println(post);
-        this.currentPost = postID;
-
-        return true;
-    }
-
-    public void closePost() {
-        if (this.currentPost != -1) {
-            System.out.println("Closed post with id " + this.currentPost + ".");
-        }
-        this.currentPost = -1;
-    }
-
-    public void addComment(int commentID) {
-        Post post = this.getCurrentPost();
-        if (!(post instanceof UserPost)) {
-            System.out.println("No post that you can comment on is currently opened.");
-            return;
-        }
-
-        ((UserPost) post).addComment(commentID);
-    }
-
-    public List<Integer> getCommentIDs() {
-        Post post = this.getCurrentPost();
-        if (!(post instanceof  UserPost)) {
-            return null;
-        }
-
-        return ((UserPost) post).getComments();
-    }
-
-    public int getPosterID(int postID) {
-        Post post = this.get(postID);
-        if (!(post instanceof UserPost)) {
-            System.out.println("No post that you can comment on is currently opened.");
-            return -1;
-        }
-
-        return ((UserPost) post).getPosterID();
-    }
-
-    public void addLike(int userID) {
-        Post post = this.getCurrentPost();
-        if (!(post instanceof UserPost)) {
-            System.out.println("No post that you can like is currently opened.");
-            return;
-        }
-
-        ((UserPost) post).addLike(userID);
-    }
-
-    public void addDislike(int userID) {
-        Post post = this.getCurrentPost();
-        if (!(post instanceof UserPost)) {
-            System.out.println("No post that you can dislike is currently opened.");
-            return;
-        }
-
-        ((UserPost) post).addDislike(userID);
+        return 0;
     }
 }

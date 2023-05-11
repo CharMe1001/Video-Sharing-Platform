@@ -1,162 +1,100 @@
 package Services;
 
-import User.User;
+import Entities.BaseEntity;
+import Entities.User.Person;
 
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Objects;
 
-public class UserService extends Service<User> {
-    private int current_user;
-
-    public UserService() {
-        super();
-        this.current_user = -1;
-    }
-
-    public int getCurrentUserID() {
-        return this.current_user;
-    }
-
-    public void register(User newUser) {
-        for (User user: this.itemHashMap.values()) {
-            if (newUser.equals(user)) {
-                System.out.println("User with these credentials already exists.");
-                return;
-            }
+public class UserService extends Service<Person> {
+    private static UserService instance = null;
+    public static UserService getInstance() {
+        if (UserService.instance == null) {
+            UserService.instance = new UserService();
         }
 
-        this.add(newUser);
+        return UserService.instance;
     }
 
-    public void login(String email, String password) {
-        User attempt = new User("", password, email);
+    private Integer logged_user;
 
-        for (Map.Entry<Integer, User> entry: this.itemHashMap.entrySet()) {
-            int id = entry.getKey();
-            User user = entry.getValue();
+    private UserService() {
+        this.logged_user = null;
+    }
 
-            if (user.equals(attempt)) {
-                this.current_user = id;
-                System.out.println("Welcome, " + user.getName() + "!");
-                return;
-            }
+    public Integer getLoggedUserID() {
+        return this.logged_user;
+    }
+
+    public void register(Person newPerson) throws SQLException {
+        String sqlCheck = "SELECT DISTINCT 1 FROM PERSON WHERE email = '" + newPerson.getEmail() + "'";
+        Statement stmt = Service.connection.createStatement();
+
+        ResultSet res = stmt.executeQuery(sqlCheck);
+        if (res.next()) {
+            System.out.println("User with this email already exists.");
+            return;
+        }
+
+        this.add(newPerson);
+    }
+
+    public void login(String email, String password) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        String sqlLogin = "SELECT * FROM PERSON WHERE email = '" + email + "' AND password = '" + password + "'";
+        Statement stmt = Service.connection.createStatement();
+        ResultSet res = stmt.executeQuery(sqlLogin);
+
+        if (res.next()) {
+            Person person = (Person)BaseEntity.getFromSelect(res);
+            this.logged_user = person.getID();
+
+            System.out.println("Welcome, " + person.getName() + "!");
+            return;
         }
 
         System.out.println("There is no user with these credentials.");
     }
 
-    private User getCurrentUser() {
-        if (this.current_user == -1) {
+    private Person getCurrentUser() throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        if (this.logged_user == null) {
             return null;
         }
 
-        return this.get(this.current_user);
+        return this.get(this.logged_user);
     }
 
-    public List<Integer> getPosts() {
-        User user = this.getCurrentUser();
-        if (user == null) {
-            return null;
-        }
+    public void logout() throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Person person = this.getCurrentUser();
 
-        return user.getPosts();
-    }
-
-    public List<Integer> getHistory() {User user = this.getCurrentUser();
-        if (user == null) {
-            return null;
-        }
-
-        return user.getHistory();
-    }
-
-    public void logout() {
-        User user = this.getCurrentUser();
-
-        if (user == null) {
+        if (person == null) {
             System.out.println("No user is logged in.");
             return;
         }
 
-        current_user = -1;
-        System.out.println("Goodbye, " + user.getName() + "!");
+        this.logged_user = null;
+        System.out.println("Goodbye, " + person.getName() + "!");
     }
 
-    public void deleteAccount() {
-        User user = this.getCurrentUser();
-
-        if (user == null) {
+    public void deleteAccount() throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        if (this.logged_user == null) {
             System.out.println("No user is logged in.");
             return;
         }
 
-        String name = user.getName();
+        Person person = this.getCurrentUser();
 
-        this.remove(this.current_user);
-        current_user = -1;
+        assert person != null;
+        String name = person.getName();
+
+        this.remove(this.logged_user);
+        this.logged_user = null;
         System.out.println("Goodbye forever, " + name + "!");
     }
 
-    public void sendComment(int commentID) {
-        User user = this.getCurrentUser();
-        if (user == null) {
-            return;
-        }
-
-        user.addComment(commentID);
-    }
-
-    public void addToHistory(int postID) {
-        User user = this.getCurrentUser();
-        if (user == null) {
-            return;
-        }
-
-        user.addToHistory(postID);
-    }
-
-    public void addToPosts(int postID) {
-        User user = this.getCurrentUser();
-        if (user == null) {
-            return;
-        }
-
-        user.addToPosts(postID);
-    }
-
-    public void subscribe(int userID) {
-        if (userID == this.current_user) {
-            System.out.println("You cannot subscribe to yourself.");
-            return;
-        }
-
-        User you = this.getCurrentUser();
-        User them = this.get(userID);
-
-        if (you == null || them == null) {
-            System.out.println("Something went wrong retrieving user data.");
-            return;
-        }
-
-        if (you.addToSubscribed(userID)) {
-            them.addSubscriber();
-        } else {
-            them.removeSubscriber();
-        }
-    }
-
-    public void addToPlaylist(int playlistID) {
-        User user = this.getCurrentUser();
-        if (user == null) {
-            System.out.println("There is no user logged in.");
-            return;
-        }
-
-        user.addToPlaylists(playlistID);
-    }
-
-    public void showData() {
+    public void showData() throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         System.out.println(this.getCurrentUser());
     }
-
 }

@@ -1,11 +1,13 @@
 package StateManager;
 
+import Entities.Post.Post;
 import Services.CommentService;
 import Services.PostService;
 import Services.UserService;
-import User.User;
-import User.Comment;
+import Entities.User.Person;
 
+import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -23,16 +25,16 @@ public enum States {
         }
 
         @Override
-        States performTask(int task) {
+        States performTask(int task) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
             switch (task) {
-                case 1: { // Register new account
-                    User user = new User();
-                    user.read(States.sc);
+                case 1 -> { // Register new account
+                    Person person = new Person();
+                    person.read(States.sc);
 
-                    States.userService.register(user);
+                    States.userService.register(person);
                     return this;
                 }
-                case 2: { // Login
+                case 2 -> { // Login
                     System.out.print("Input email: ");
                     String email = States.sc.next();
 
@@ -40,12 +42,16 @@ public enum States {
                     String password = States.sc.next();
 
                     States.userService.login(email, password);
+
+                    if (States.userService.getLoggedUserID() == null) {
+                        return this;
+                    }
                     return LOGGED_IN;
                 }
-                case 3: { // Exit program
+                case 3 -> { // Exit program
                     return EXITED;
                 }
-                default: {
+                default -> {
                     System.out.println("Wrong task. Try again.");
                     return this;
                 }
@@ -57,10 +63,20 @@ public enum States {
         int getTask() {
             int task;
 
-            System.out.println("Input a task:\n\t1. Show all posts;\n\t2. Show all of your posts;\n\t3. Create a new post;\n\t" +
-                    "4. Open a post;\n\t5. Delete a post;\n\t6. Show all of your playlists;\n\t7. Create a new playlist;\n\t" +
-                    "8. Open a playlist;\n\t9. Delete a playlist;\n\t10. Show history.\n\t11. Show user stats.\n\t12. Logout;\n\t" +
-                    "13. Delete your account;\n\t14. Exit the program;");
+            System.out.println("""
+                    Input a task:
+                    \t1. Show all posts;
+                    \t2. Show all of your posts;
+                    \t3. Create a new post;
+                    \t4. Open a post;
+                    \t5. Delete a post;
+                    \t6. Show all of your playlists;
+                    \t7. Create a new playlist;
+                    \t8. Open a playlist;
+                    \t9. Delete a playlist;
+                    \t10. Logout;
+                    \t11. Delete your account;
+                    \t12. Exit the program;""");
             task = States.sc.nextInt();
             States.sc.nextLine();
 
@@ -68,89 +84,77 @@ public enum States {
         }
 
         @Override
-        States performTask(int task) {
+        States performTask(int task) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+            Integer userID = States.userService.getLoggedUserID();
+            if (userID == null) {
+                System.out.println("No user logged in.");
+                return NOT_LOGGED;
+            }
+
             switch (task) {
-                case 1: { // Show all posts
-                    System.out.println(States.postService);
+                case 1 -> { // Show all posts
+                    List<Post> posts = States.postService.getAll();
+                    for (Post post: posts) {
+                        System.out.println(post);
+                    }
+
                     return this;
                 }
-                case 2: { // Show all of your posts
+                case 2 -> { // Show all of your posts
                     System.out.println("Your posts:");
-                    States.postService.showPosts(States.userService.getPosts());
-                    return this;
-                }
-                case 3: { // Create a new post
-                    int userID = States.userService.getCurrentUserID();
-                    if (userID == -1) {
-                        System.out.println("No user logged in.");
-                        return NOT_LOGGED;
+                    List<Post> posts = States.postService.getAllFromUser(userID);
+                    for (Post post: posts) {
+                        System.out.println(post);
                     }
 
-                    States.userService.addToPosts(States.postService.read(States.sc, userID));
                     return this;
                 }
-                case 4: { // Open a post
-                    System.out.print("Input post ID: ");
-                    int postID = States.sc.nextInt();
-                    States.sc.nextLine();
+                case 3 -> { // Create a new post
+                    States.postService.read(States.sc, userID);
+                    return this;
+                }
+                case 4 -> { // Open a post
+                    System.out.print("Input post id to open: ");
+                    Integer id = States.sc.nextInt();
 
-                    if (States.postService.openPost(postID)) {
-                        States.userService.addToHistory(postID);
-                    }
+                    States.postService.setCurrentPostID(id);
                     return WATCHING_POST;
                 }
-                case 5: { // Delete a post
-                    System.out.print("Input post ID: ");
-                    int postID = States.sc.nextInt();
-                    States.sc.nextLine();
+                case 5 -> { // Delete a post
+                    System.out.println("Input post id to delete: ");
+                    Integer id = States.sc.nextInt();
 
-                    int userID = States.userService.getCurrentUserID();
-                    int posterID = States.postService.getPosterID(postID);
-                    if (userID == -1 || userID != posterID) {
-                        System.out.println("You cannot delete this post.");
-                        return this;
-                    }
-
-                    States.postService.remove(postID);
+                    States.postService.remove(id);
                     return this;
                 }
-                case 6: { // Show all of your playlists
+                case 6 -> { // Show all of your playlists
                     System.out.println("Will implement print all playlists in the future.");
                     return this;
                 }
-                case 7: { // Create a new playlist
+                case 7 -> { // Create a new playlist
                     System.out.println("Will implement create playlist in the future.");
                     return this;
                 }
-                case 8: { // Open a playlist
+                case 8 -> { // Open a playlist
                     System.out.println("Will implement open playlist in the future.");
                     return WATCHING_PLAYLIST;
                 }
-                case 9: { // Delete a playlist
+                case 9 -> { // Delete a playlist
                     System.out.println("Will implement delete playlist in the future.");
                     return this;
                 }
-                case 10: { // Show history
-                    System.out.println("History:");
-                    States.postService.showPosts(States.userService.getHistory());
-                    return this;
-                }
-                case 11: { //Show user stats
-                    States.userService.showData();
-                    return this;
-                }
-                case 12: { // Logout
+                case 10 -> { // Logout
                     States.userService.logout();
                     return NOT_LOGGED;
                 }
-                case 13: { // Delete your account
+                case 11 -> { // Delete your account
                     States.userService.deleteAccount();
                     return NOT_LOGGED;
                 }
-                case 14: { // Exit the program
+                case 12 -> { // Exit the program
                     return EXITED;
                 }
-                default: {
+                default -> {
                     System.out.println("Wrong task. Try again.");
                     return this;
                 }
@@ -162,9 +166,17 @@ public enum States {
         int getTask() {
             int task;
 
-            System.out.println("Input a task:\n\t1. Subscribe/Unsubscribe from user.\n\t2. Like/Un-like the current post;\n\t" +
-                    "3. Dislike/Un-dislike the current post;\n\t4. Add to a playlist;\n\t5. Close the current post;\n\t" +
-                    "6. Show the comments;\n\t7. Add a comment;\n\t8. Reply to a comment;\n\t9. Exit the program;");
+            System.out.println("""
+                    Input a task:
+                    \t1. Subscribe/Unsubscribe from user;
+                    \t2. Like/Un-like the current post;
+                    \t3. Dislike/Un-dislike the current post;
+                    \t4. Add to a playlist;
+                    \t5. Close the current post;
+                    \t6. Show the comments;
+                    \t7. Add a comment;
+                    \t8. Reply to a comment;
+                    \t9. Exit the program;""");
             task = States.sc.nextInt();
             States.sc.nextLine();
 
@@ -174,89 +186,35 @@ public enum States {
         @Override
         States performTask(int task) {
             switch (task) {
-                case 1: { // Subscribe/Unsubscribe from user
-                    int posterID = States.postService.getPosterID(States.postService.getCurrentPostID());
-
-                    States.userService.subscribe(posterID);
+                case 1 -> { // Subscribe/Unsubscribe from user
                     return this;
                 }
-                case 2: { // Like the current post
-                    int userID = States.userService.getCurrentUserID();
-                    if (userID == -1) {
-                        System.out.println("There is no user logged in.");
-                        return NOT_LOGGED;
-                    }
-
-                    States.postService.addLike(States.userService.getCurrentUserID());
-                    States.postService.openPost(States.postService.getCurrentPostID());
+                case 2 -> { // Like the current post
                     return this;
                 }
-                case 3: { // Dislike the current post
-                    int userID = States.userService.getCurrentUserID();
-                    if (userID == -1) {
-                        System.out.println("There is no user logged in.");
-                        return NOT_LOGGED;
-                    }
-
-                    States.postService.addDislike(States.userService.getCurrentUserID());
-                    States.postService.openPost(States.postService.getCurrentPostID());
+                case 3 -> { // Dislike the current post
                     return this;
                 }
-                case 4: { // Add to a playlist
+                case 4 -> { // Add to a playlist
                     System.out.println("Will implement add to playlist later.");
                     return this;
                 }
-                case 5: { // Close the current post
-                    States.postService.closePost();
+                case 5 -> { // Close the current post
                     return LOGGED_IN;
                 }
-                case 6: { // Show the comments
-                    List<Integer> commentIDS = States.postService.getCommentIDs();
-                    if (commentIDS != null) {
-                        System.out.println(States.commentService.getComments(commentIDS));
-                    }
+                case 6 -> { // Show the comments
                     return this;
                 }
-                case 7: { // Add a comment
-                    int userID = States.userService.getCurrentUserID();
-                    int postID = States.postService.getCurrentPostID();
-                    if (userID == -1 || postID == -1) {
-                        System.out.println("Cannot write a comment.");
-                        return this;
-                    }
-
-                    System.out.println("Input contents of comment:");
-                    String text = States.sc.nextLine();
-
-                    int commentID = States.commentService.add(new Comment(userID, postID, text));
-                    States.userService.sendComment(commentID);
-                    States.postService.addComment(commentID);
+                case 7 -> { // Add a comment
                     return this;
                 }
-                case 8: { // Reply to a comment
-                    int userID = States.userService.getCurrentUserID();
-                    int postID = States.postService.getCurrentPostID();
-                    if (userID == -1 || postID == -1) {
-                        System.out.println("Cannot write a comment.");
-                        return this;
-                    }
-
-                    System.out.print("Input id of comment replied to: ");
-                    int parentID = States.sc.nextInt();
-                    States.sc.nextLine();
-
-                    System.out.println("Input contents of comment:");
-                    String text = States.sc.nextLine();
-
-                    int commentID = States.commentService.add(new Comment(userID, postID, text, parentID));
-                    States.userService.sendComment(commentID);
-                    States.postService.addComment(commentID);
+                case 8 -> { // Reply to a comment
                     return this;
                 }
-                case 9: { // Exit the program
+                case 9 -> { // Exit the program
                     return EXITED;
                 }
-                default: {
+                default -> {
                     System.out.println("Wrong task. Try again.");
                     return this;
                 }
@@ -295,12 +253,12 @@ public enum States {
     }
 
     abstract int getTask();
-    abstract States performTask(int task);
+    abstract States performTask(int task) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException;
 
     static {
-        States.postService = new PostService();
-        States.userService = new UserService();
-        States.commentService = new CommentService();
+        States.postService = PostService.getInstance();
+        States.userService = UserService.getInstance();
+        States.commentService = CommentService.getInstance();
         States.sc = new Scanner(System.in);
     }
 }

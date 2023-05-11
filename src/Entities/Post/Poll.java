@@ -1,27 +1,27 @@
-package Post;
+package Entities.Post;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Poll extends UserPost {
     private String text;
     private List<String> options;
 
     public Poll() {
-        super(0, "", null);
+        super(null, "", null);
         this.text = "";
         this.options = new ArrayList<>();
     }
 
-    public Poll(int posterID) {
+    public Poll(Integer posterID) {
         super(posterID);
         this.text = "";
         this.options = new ArrayList<>();
     }
 
-    public Poll(int posterID, String name, String text, List<String> options) {
+    public Poll(Integer posterID, String name, String text, List<String> options) {
         super(posterID, name, null);
         this.text = text;
         this.options = options;
@@ -31,9 +31,6 @@ public class Poll extends UserPost {
     public void read(Scanner sc) {
         System.out.print("Input name: ");
         this.name = sc.nextLine();
-
-        this.likes = new HashSet<>();
-        this.comments = new ArrayList<>();
 
         System.out.print("Input poll text: ");
         this.text = sc.nextLine();
@@ -59,5 +56,35 @@ public class Poll extends UserPost {
         }
 
         return ret.toString();
+    }
+
+    public String getColumns() {
+        return super.getColumns() + ", text";
+    }
+
+    public String toSQLInsertOptions() {
+        return "INSERT INTO OPTIONS(text, pollID) VALUES" + this.options.stream().<String>map(option -> "('" + option + "', " + this.id + ")").collect(Collectors.joining(", "));
+    }
+
+    public String toSQLInsert(String className) {
+        return super.toSQLInsert(className) + ", '" + this.text + "')";
+    }
+
+    public String getSQLUpdate(String className) {
+
+
+        return super.getSQLUpdate(className) + ", text = '" + this.text + "', options = OPT_TAB(" + this.options.stream().<String>map(option -> "'" + option + "'").collect(Collectors.joining(", ")) + ")";
+    }
+
+    protected void getDataFromSelect(ResultSet src) throws SQLException {
+        super.getDataFromSelect(src);
+
+        this.text = src.getString("text");
+    }
+
+    public void getOptionsFromResult(ResultSet options) throws SQLException {
+        while (options.next()) {
+            this.options.add(options.getString("text"));
+        }
     }
 }
