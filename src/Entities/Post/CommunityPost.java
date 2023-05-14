@@ -52,6 +52,11 @@ public class CommunityPost extends UserPost {
     protected void getDataFromSelect(ResultSet src) throws SQLException {
         super.getDataFromSelect(src);
 
-        this.text = src.getString("text");
+        try {
+            this.text = src.getString("text");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting text of community post with id = " + this.id + "!");
+            throw sqlE;
+        }
     }
 }

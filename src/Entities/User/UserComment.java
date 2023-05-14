@@ -19,6 +19,13 @@ public class UserComment extends BaseEntity {
         this.parentID = null;
     }
 
+    public UserComment(Integer userID, Integer postID, String text, Integer parentID) {
+        this.userID = userID;
+        this.postID = postID;
+        this.text = text;
+        this.parentID = parentID;
+    }
+
     public UserComment(Integer userID, Integer postID, String text) {
         this.userID = userID;
         this.postID = postID;
@@ -29,12 +36,14 @@ public class UserComment extends BaseEntity {
     public UserComment(Integer userID, Integer postID) {
         this.userID = userID;
         this.postID = postID;
+        this.text = "";
+        this.parentID = null;
     }
 
-    public UserComment(Integer userID, Integer postID, String text, Integer parentID) {
+    public UserComment(Integer userID, Integer postID, Integer parentID) {
         this.userID = userID;
         this.postID = postID;
-        this.text = text;
+        this.text = "";
         this.parentID = parentID;
     }
 
@@ -45,6 +54,7 @@ public class UserComment extends BaseEntity {
 
     public String toString() {
         String ret = "";
+        ret += ("Comment ID: " + this.id + "\n");
         ret += ("User ID: " + this.userID + "\n");
         ret += ("Post ID: " + this.postID + "\n");
         ret += ("Content: " + this.text + "\n");
@@ -55,24 +65,55 @@ public class UserComment extends BaseEntity {
         return ret;
     }
 
+    public Integer getParentID() {
+        return this.parentID;
+    }
+
     public String getColumns() {
         return super.getColumns() + "userID, postID, text, parentID";
     }
 
     public String toSQLInsert(String className) {
-        return super.toSQLInsert(className) + "'" + this.userID + "', '" + this.postID + "', '" + this.text + "', " + (this.parentID == null ? "null" : "'" + this.parentID + "'") + ")";
+        return super.toSQLInsert(className) + this.userID + ", " + this.postID + ", '" + this.text + "', " + (this.parentID == null ? "null" : this.parentID) + ")";
     }
 
     public String getSQLUpdate(String className) {
-        return super.getSQLUpdate(className) + ", userID = '" + this.userID + "', postID = '" + this.postID + "', text = '" + this.text + ", parentID = " + (this.parentID == null ? "null" : "'" + this.parentID + "'");
+        return super.getSQLUpdate(className) + ", userID = " + this.userID + ", postID = " + this.postID + ", text = '" + this.text + "', parentID = " + (this.parentID == null ? "null" : this.parentID);
     }
 
     protected void getDataFromSelect(ResultSet src) throws SQLException {
         super.getDataFromSelect(src);
 
-        this.userID = src.getInt("userID");
-        this.postID = src.getInt("postID");
-        this.text = src.getString("text");
-        this.parentID = src.getInt("parentID");
+        try {
+            this.userID = src.getInt("userID");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting id of user for comment with id = " + this.id + "!");
+            throw sqlE;
+        }
+
+        try {
+            this.postID = src.getInt("postID");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting id of post for comment with id = " + this.id + "!");
+            throw sqlE;
+        }
+
+        try {
+            this.text = src.getString("text");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting text of comment with id = " + this.id + "!");
+            throw sqlE;
+        }
+
+        try {
+            this.parentID = src.getInt("parentID");
+
+            if (this.parentID == 0) {
+                this.parentID = null;
+            }
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting id of parent for comment with id = " + this.id + "!");
+            throw sqlE;
+        }
     }
 }

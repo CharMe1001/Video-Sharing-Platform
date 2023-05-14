@@ -1,9 +1,8 @@
 package Services;
 
 import Entities.BaseEntity;
-import Entities.Post.Poll;
 
-import java.lang.reflect.Constructor;
+import javax.swing.plaf.nimbus.State;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 
@@ -11,7 +10,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Service<T extends BaseEntity> {
+public abstract class Service<T extends BaseEntity> {
     protected String getGenericName() {
         String[] name = ((Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]).getTypeName().split("\\.", 0);
         return name[name.length - 1].toUpperCase();
@@ -19,12 +18,21 @@ public class Service<T extends BaseEntity> {
 
     static public Connection connection;
 
-    public T add(T item) throws SQLException {
+    public T add(T item) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         String insertQuery = item.toSQLInsert(this.getGenericName());
+        PreparedStatement insertStmt;
 
-        PreparedStatement insertStmt = Service.connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
-        System.out.println(insertQuery);
-        insertStmt.executeUpdate();
+        try {
+            insertStmt = Service.connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
+            insertStmt.executeUpdate();
+        } catch (SQLException sqlE) {
+            System.out.println("Error adding new " + this.getGenericName() + "!");
+            System.out.println("Insert statement: " + insertQuery);
+            System.out.println(this.getGenericName() + ":");
+            System.out.println(item);
+
+            throw sqlE;
+        }
 
         try (ResultSet resID = insertStmt.getGeneratedKeys()) {
             if (resID.next()) {
@@ -42,17 +50,27 @@ public class Service<T extends BaseEntity> {
             } else {
                 throw new SQLException("Error inserting new " + this.getGenericName() + ".\n" + insertStmt);
             }
-        } catch (SQLException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                 InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            System.out.println("Error retrieving new inserted " + this.getGenericName() + " from database!");
+            throw e;
         }
     }
 
-    public void remove(Integer id) throws SQLException {
+    public void remove(Integer id) {
         String deleteQuery = "DELETE FROM " + this.getGenericName() + " WHERE id = " + id;
-        Statement deleteStmt = Service.connection.createStatement();
+        int cntDeleted;
 
-        int cntDeleted = deleteStmt.executeUpdate(deleteQuery);
+        try {
+            Statement deleteStmt = Service.connection.createStatement();
+            cntDeleted = deleteStmt.executeUpdate(deleteQuery);
+        } catch (SQLException sqlE) {
+            System.out.println("Error removing " + this.getGenericName() + " from the database!");
+            System.out.println("Delete statement: " + deleteQuery);
+
+            System.out.println(sqlE.getMessage());
+            return;
+        }
+
         if (cntDeleted == 0) {
             System.out.println("There were no " + this.getGenericName() + "s with id = " + id + "!");
         } else {
@@ -60,41 +78,89 @@ public class Service<T extends BaseEntity> {
         }
     }
 
-    public void set(Integer id, T item) throws SQLException {
-        String updateQuery = item.getSQLUpdate(this.getGenericName()) + " WHERE id = " + id;
-        Statement updateStmt = Service.connection.createStatement();
+    public void set(T item) {
+        String updateQuery = item.getSQLUpdate(this.getGenericName()) + " WHERE id = " + item.getID();
+        int cntUpdated;
 
-        int cntUpdated = updateStmt.executeUpdate(updateQuery);
+        try {
+            Statement updateStmt = Service.connection.createStatement();
+            cntUpdated = updateStmt.executeUpdate(updateQuery);
+        }  catch (SQLException sqlE) {
+            System.out.println("Error updating " + this.getGenericName() + " in database!");
+            System.out.println("Update statement: " + updateQuery);
+            System.out.println(this.getGenericName() + ":");
+            System.out.println(item);
+
+            System.out.println(sqlE.getMessage());
+            return;
+        }
+
         if (cntUpdated == 0) {
-            System.out.println("There were no " + this.getGenericName() + "s with id = " + id + "!");
+            System.out.println("There were no " + this.getGenericName() + "s with id = " + item.getID() + "!");
         } else {
-            System.out.println("Successfully updated " + this.getGenericName() + " with id = " + id + ".");
+            System.out.println("Successfully updated " + this.getGenericName() + " with id = " + item.getID() + ".");
         }
 
     }
 
-    public T get(Integer id) throws SQLException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public T get(Integer id) {
         String getQuery = "SELECT * FROM " + this.getGenericName() + " WHERE id = " + id;
-        Statement getStmt = Service.connection.createStatement();
+        ResultSet res;
 
-        ResultSet res = getStmt.executeQuery(getQuery);
+        try {
+            Statement getStmt = Service.connection.createStatement();
+            res = getStmt.executeQuery(getQuery);
+        } catch (SQLException sqlE) {
+            System.out.println("Error retrieving " + this.getGenericName() + " with id = " + id + "!");
+            System.out.println("Select statement: " + getQuery);
+            System.out.println(sqlE.getMessage());
+            return null;
+        }
 
-        if (res.next()) {
-            return (T)BaseEntity.getFromSelect(res);
-        } else {
-            throw new SQLException("No " + this.getGenericName() + " found with id = " + id + "!");
+        try {
+            if (res.next()) {
+                return (T)BaseEntity.getFromSelect(res);
+            } else {
+                throw new SQLException("No " + this.getGenericName() + " found with id = " + id + "!");
+            }
+        } catch (Exception e) {
+            System.out.println("Error retrieving " + this.getGenericName() + " with id = " + id + "!");
+            System.out.println(e.getMessage());
+            return null;
         }
     }
 
-    public List<T> getAll() throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public List<T> getAll() {
         String getQuery = "SELECT * FROM " + this.getGenericName();
-        Statement getStmt = Service.connection.createStatement();
+        ResultSet res;
 
-        ResultSet res = getStmt.executeQuery(getQuery);
+        try {
+            Statement getStmt = Service.connection.createStatement();
+            res = getStmt.executeQuery(getQuery);
+        } catch (SQLException sqlE) {
+            System.out.println("Error retrieving all objects of type " + this.getGenericName() + "!");
+            System.out.println(sqlE.getMessage());
+            return null;
+        }
+
         List<T> ret = new ArrayList<>();
 
-        while (res.next()) {
-            ret.add((T)BaseEntity.getFromSelect(res));
+        while (true) {
+            try {
+                if (!res.next()) {
+                    break;
+                }
+            } catch (SQLException sqlE) {
+                System.out.println("Error retrieving next " + this.getGenericName() + "!");
+                System.out.println(sqlE.getMessage());
+            }
+
+            try {
+                ret.add((T)BaseEntity.getFromSelect(res));
+            } catch (Exception e) {
+                System.out.println("Error reading " + this.getGenericName() + " from database!");
+                System.out.println(e.getMessage());
+            }
         }
 
         return ret;

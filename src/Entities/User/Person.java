@@ -44,11 +44,9 @@ public class Person extends BaseEntity {
     }
 
     public boolean equals(Object object) {
-        if (!(object instanceof Person)) {
+        if (!(object instanceof Person person)) {
             return false;
         }
-
-        Person person = (Person)object;
 
         return (this.email.equals(person.email) && this.password.equals(person.password));
     }
@@ -74,7 +72,18 @@ public class Person extends BaseEntity {
     protected void getDataFromSelect(ResultSet src) throws SQLException {
         super.getDataFromSelect(src);
 
-        this.name = src.getString("name");
-        this.email = src.getString("email");
+        try {
+            this.name = src.getString("name");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting name of user with id = " + this.id + "!");
+            throw sqlE;
+        }
+
+        try {
+            this.email = src.getString("email");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting email of user with id = " + this.id + "!");
+            throw sqlE;
+        }
     }
 }

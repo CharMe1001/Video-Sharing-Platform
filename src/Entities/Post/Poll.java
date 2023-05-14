@@ -79,12 +79,31 @@ public class Poll extends UserPost {
     protected void getDataFromSelect(ResultSet src) throws SQLException {
         super.getDataFromSelect(src);
 
-        this.text = src.getString("text");
+        try {
+            this.text = src.getString("text");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting text from poll with id = " + this.id + "!");
+            throw sqlE;
+        }
     }
 
     public void getOptionsFromResult(ResultSet options) throws SQLException {
-        while (options.next()) {
-            this.options.add(options.getString("text"));
+        while (true) {
+            try {
+                if (!options.next()) {
+                    break;
+                }
+            } catch (SQLException sqlE) {
+                System.out.println("Error retrieving next poll option for poll with id = " + this.id + "!");
+                throw sqlE;
+            }
+
+            try {
+                this.options.add(options.getString("text"));
+            } catch (SQLException sqlE) {
+                System.out.println("Error getting text for poll with id = " + this.id + "!");
+                throw sqlE;
+            }
         }
     }
 }

@@ -71,10 +71,50 @@ public class JDBCUtils {
                 "FOREIGN KEY(parentID) REFERENCES USERCOMMENT(id)" +
                 ")";
         stmt.executeUpdate(sqlCreateComment);
+
+        String sqlCreateSubscribedTo = "CREATE TABLE SUBSCRIBEDTO(" +
+                "id INT IDENTITY(1, 1) PRIMARY KEY," +
+                "dateCreated DATE DEFAULT CURRENT_TIMESTAMP NOT NULL," +
+                "subscriberID INT NOT NULL," +
+                "subscribedID INT NOT NULL," +
+                "FOREIGN KEY(subscriberID) REFERENCES PERSON(id)," +
+                "FOREIGN KEY(subscribedID) REFERENCES PERSON(id)," +
+                "CONSTRAINT NOT_SELF CHECK(subscribedID <> subscriberID)" +
+                ")";
+        stmt.executeUpdate(sqlCreateSubscribedTo);
+
+        String sqlCreateEngagement = "CREATE TABLE ENGAGEMENT(" +
+                "id INT IDENTITY(1, 1) PRIMARY KEY," +
+                "userID INT NOT NULL," +
+                "postID INT NOT NULL," +
+                "liked BIT NOT NULL," +
+                "disliked BIT NOT NULL," +
+                "FOREIGN KEY(userID) REFERENCES PERSON(id)," +
+                "FOREIGN KEY(postID) REFERENCES POST(id)" +
+                ")";
+        stmt.executeUpdate(sqlCreateEngagement);
+
+        String sqlCreatePlaylistContent = "CREATE TABLE PLAYLISTCONTENT(" +
+                "id INT IDENTITY(1, 1) PRIMARY KEY," +
+                "postID INT NOT NULL," +
+                "playlistID INT NOT NULL," +
+                "FOREIGN KEY(postID) REFERENCES POST(id)," +
+                "FOREIGN KEY(playlistID) REFERENCES PLAYLIST(id)" +
+                ")";
+        stmt.executeUpdate(sqlCreatePlaylistContent);
     }
 
     public static void DropEverything() throws SQLException {
         Statement stmt = JDBCUtils.connection.createStatement();
+
+        String sqlDropPlaylistContent = "DROP TABLE IF EXISTS PLAYLISTCONTENT";
+        stmt.executeUpdate(sqlDropPlaylistContent);
+
+        String sqlDropEngagement = "DROP TABLE IF EXISTS ENGAGEMENT";
+        stmt.executeUpdate(sqlDropEngagement);
+
+        String sqlDropSubscribedTo = "DROP TABLE IF EXISTS SUBSCRIBEDTO";
+        stmt.executeUpdate(sqlDropSubscribedTo);
 
         String sqlDropOptions = "DROP TABLE IF EXISTS OPTIONS";
         stmt.executeUpdate(sqlDropOptions);

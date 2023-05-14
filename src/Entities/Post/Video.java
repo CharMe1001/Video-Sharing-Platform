@@ -60,7 +60,18 @@ public class Video extends UserPost {
     protected void getDataFromSelect(ResultSet src) throws SQLException {
         super.getDataFromSelect(src);
 
-        this.source = src.getString("source");
-        this.length = src.getDouble("length");
+        try {
+            this.source = src.getString("source");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting source of video with id = " + this.id + "!");
+            throw sqlE;
+        }
+
+        try {
+            this.length = src.getDouble("length");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting length of video with id = " + this.id + "!");
+            throw sqlE;
+        }
     }
 }

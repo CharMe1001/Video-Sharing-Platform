@@ -1,15 +1,15 @@
 package StateManager;
 
 import Entities.Post.Post;
-import Services.CommentService;
-import Services.PostService;
-import Services.UserService;
+import Entities.Post.Video;
+import Entities.User.Playlist;
+import Entities.User.UserComment;
+import Services.*;
 import Entities.User.Person;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public enum States {
     NOT_LOGGED {
@@ -17,7 +17,7 @@ public enum States {
         int getTask() {
             int task;
 
-            System.out.println("Input a task:\n\t1. Register new account;\n\t2. Login;\n\t3. Exit program;");
+            System.out.println("Input a task:\n\t1. Register new account;\n\t2. Login;\n\t3. Exit program.");
             task = States.sc.nextInt();
             States.sc.nextLine();
 
@@ -25,7 +25,7 @@ public enum States {
         }
 
         @Override
-        States performTask(int task) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        States performTask(int task) {
             switch (task) {
                 case 1 -> { // Register new account
                     Person person = new Person();
@@ -61,22 +61,21 @@ public enum States {
     LOGGED_IN {
         @Override
         int getTask() {
+            Integer userID = States.userService.getLoggedUserID();
+            if (userID == null) {
+                System.out.println("No user logged in.");
+                return 5;
+            }
+
             int task;
 
             System.out.println("""
                     Input a task:
-                    \t1. Show all posts;
-                    \t2. Show all of your posts;
-                    \t3. Create a new post;
-                    \t4. Open a post;
-                    \t5. Delete a post;
-                    \t6. Show all of your playlists;
-                    \t7. Create a new playlist;
-                    \t8. Open a playlist;
-                    \t9. Delete a playlist;
-                    \t10. Logout;
-                    \t11. Delete your account;
-                    \t12. Exit the program;""");
+                    \t1. Go to post menu;
+                    \t2. Go to playlist menu;
+                    \t3. Go to profile;
+                    \t4. Logout;
+                    \t5. Exit the program.""");
             task = States.sc.nextInt();
             States.sc.nextLine();
 
@@ -84,17 +83,59 @@ public enum States {
         }
 
         @Override
-        States performTask(int task) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-            Integer userID = States.userService.getLoggedUserID();
-            if (userID == null) {
-                System.out.println("No user logged in.");
-                return NOT_LOGGED;
+        States performTask(int task) {
+            switch (task) {
+                case 1 -> { // Go to post menu
+                    return POST_MENU;
+                }
+                case 2 -> { // Go to playlist menu
+                    return PLAYLIST_MENU;
+                }
+                case 3 -> { // Go to profile
+                    return PROFILE;
+                }
+                case 4 -> { // Logout
+                    States.userService.logout();
+                    return NOT_LOGGED;
+                }
+                case 5 -> { // Exit the program
+                    return EXITED;
+                }
+                default -> {
+                    System.out.println("Wrong task. Try again.");
+                    return this;
+                }
             }
+        }
+    },
+    POST_MENU {
+        @Override
+        int getTask() {
+            int task;
+
+                System.out.println("""
+                        Input a task:
+                        \t1. Show post feed;
+                        \t2. Show all of your posts;
+                        \t3. Create a new post;
+                        \t4. Open a post;
+                        \t5. Show history;
+                        \t6. Go back;
+                        \t7. Exit program.""");
+            task = States.sc.nextInt();
+            States.sc.nextLine();
+
+            return task;
+        }
+
+        @Override
+        States performTask(int task) {
+            Integer userID = States.userService.getLoggedUserID();
 
             switch (task) {
-                case 1 -> { // Show all posts
+                case 1 -> { // Show post feed
                     List<Post> posts = States.postService.getAll();
-                    for (Post post: posts) {
+                    for (Post post : posts) {
                         System.out.println(post);
                     }
 
@@ -103,55 +144,32 @@ public enum States {
                 case 2 -> { // Show all of your posts
                     System.out.println("Your posts:");
                     List<Post> posts = States.postService.getAllFromUser(userID);
-                    for (Post post: posts) {
+                    for (Post post : posts) {
                         System.out.println(post);
                     }
 
                     return this;
                 }
                 case 3 -> { // Create a new post
-                    States.postService.read(States.sc, userID);
+                    States.postService.add(States.sc, userID);
                     return this;
                 }
                 case 4 -> { // Open a post
                     System.out.print("Input post id to open: ");
                     Integer id = States.sc.nextInt();
 
-                    States.postService.setCurrentPostID(id);
+                    States.postService.openPost(id);
+                    System.out.println(States.postService.getCurrentPost());
                     return WATCHING_POST;
                 }
-                case 5 -> { // Delete a post
-                    System.out.println("Input post id to delete: ");
-                    Integer id = States.sc.nextInt();
-
-                    States.postService.remove(id);
+                case 5 -> { // Show history
+                    System.out.println("Will implement showing history later.");
                     return this;
                 }
-                case 6 -> { // Show all of your playlists
-                    System.out.println("Will implement print all playlists in the future.");
-                    return this;
+                case 6 -> { // Go back
+                    return LOGGED_IN;
                 }
-                case 7 -> { // Create a new playlist
-                    System.out.println("Will implement create playlist in the future.");
-                    return this;
-                }
-                case 8 -> { // Open a playlist
-                    System.out.println("Will implement open playlist in the future.");
-                    return WATCHING_PLAYLIST;
-                }
-                case 9 -> { // Delete a playlist
-                    System.out.println("Will implement delete playlist in the future.");
-                    return this;
-                }
-                case 10 -> { // Logout
-                    States.userService.logout();
-                    return NOT_LOGGED;
-                }
-                case 11 -> { // Delete your account
-                    States.userService.deleteAccount();
-                    return NOT_LOGGED;
-                }
-                case 12 -> { // Exit the program
+                case 7 -> { // Exit program
                     return EXITED;
                 }
                 default -> {
@@ -164,6 +182,12 @@ public enum States {
     WATCHING_POST {
         @Override
         int getTask() {
+            Integer postID = States.postService.getCurrentPostID();
+            if (postID == null) {
+                System.out.println("There is no post opened");
+                return 5;
+            }
+
             int task;
 
             System.out.println("""
@@ -176,7 +200,7 @@ public enum States {
                     \t6. Show the comments;
                     \t7. Add a comment;
                     \t8. Reply to a comment;
-                    \t9. Exit the program;""");
+                    \t9. Exit the program.""");
             task = States.sc.nextInt();
             States.sc.nextLine();
 
@@ -185,33 +209,153 @@ public enum States {
 
         @Override
         States performTask(int task) {
+            Integer userID = States.userService.getLoggedUserID();
+
             switch (task) {
                 case 1 -> { // Subscribe/Unsubscribe from user
+                    Integer posterID = States.postService.getCurrentPost().getPosterID();
+                    if (posterID == null) {
+                        System.out.println("This is an ad. You cannot subscribe to its poster.");
+                        return this;
+                    }
+
+                    States.userService.subscribeTo(posterID);
+
                     return this;
                 }
                 case 2 -> { // Like the current post
+                    States.postService.like(userID);
                     return this;
                 }
                 case 3 -> { // Dislike the current post
+                    States.postService.dislike(userID);
                     return this;
                 }
                 case 4 -> { // Add to a playlist
-                    System.out.println("Will implement add to playlist later.");
+                    Post post = States.postService.getCurrentPost();
+                    if (!(post instanceof Video)) {
+                        System.out.println("You cannot add a " + post.getClass().getSimpleName() +" to a playlist; it needs to be a Video!");
+                        return this;
+                    }
+
+                    System.out.println("Your playlists:");
+                    List<Playlist> playlists = States.playlistService.getAllFromUser(userID);
+                    for (Playlist playlist: playlists) {
+                        System.out.println(playlist);
+                    }
+
+                    System.out.print("\nChoose playlist id to add this video to: ");
+                    Integer playlistID = States.sc.nextInt();
+
+                    if (playlists.stream().noneMatch(playlist -> (Objects.equals(playlist.getID(), playlistID)))) {
+                        System.out.println("The requested playlist id doesn't exist!");
+                        return this;
+                    }
+
+                    States.postService.addToPlaylist(playlistID);
                     return this;
                 }
                 case 5 -> { // Close the current post
-                    return LOGGED_IN;
+                    States.postService.closePost();
+                    return POST_MENU;
                 }
                 case 6 -> { // Show the comments
+                    System.out.println("Comments:");
+
+                    List<UserComment> comments = States.postService.getCurrentPost().getComments();
+                    Stack<Integer> hierarchy = new Stack<>();
+
+                    for (UserComment comment: comments) {
+                        while ((!hierarchy.isEmpty()) && !Objects.equals(comment.getParentID(), hierarchy.peek())) {
+                            hierarchy.pop();
+                        }
+
+                        System.out.println(comment.toString().indent(hierarchy.size()));
+                        System.out.println();
+                        hierarchy.push(comment.getID());
+                    }
+
                     return this;
                 }
                 case 7 -> { // Add a comment
+                    States.postService.addComment(States.sc, userID);
                     return this;
                 }
                 case 8 -> { // Reply to a comment
+                    System.out.print("Input id of comment you are replying to: ");
+                    Integer parentID = States.sc.nextInt();
+                    States.sc.nextLine();
+
+                    States.postService.addComment(States.sc, userID, parentID);
                     return this;
                 }
                 case 9 -> { // Exit the program
+                    return EXITED;
+                }
+                default -> {
+                    System.out.println("Wrong task. Try again.");
+                    return this;
+                }
+            }
+        }
+    },
+    PLAYLIST_MENU {
+        @Override
+        int getTask() {
+            int task;
+
+            System.out.println("""
+                        Input a task:
+                        \t1. Show all of your playlists;
+                        \t2. Create a new playlist;
+                        \t3. Open a playlist;
+                        \t4. Delete a playlist;
+                        \t5. Go back;
+                        \t6. Exit program.""");
+            task = States.sc.nextInt();
+            States.sc.nextLine();
+
+            return task;
+        }
+
+        @Override
+        States performTask(int task) {
+            Integer userID = States.userService.getLoggedUserID();
+
+            switch(task) {
+                case 1 -> { // Show all of your playlists
+                    List<Playlist> playlists =  States.playlistService.getAllFromUser(userID);
+
+                    System.out.println("Your playlists:");
+                    for (Playlist playlist: playlists) {
+                        System.out.println(playlist);
+                    }
+
+                    return this;
+                }
+                case 2 -> { // Create a new playlist
+                    States.playlistService.add(States.sc, userID);
+                    return this;
+                }
+                case 3 -> { // Open a playlist
+                    System.out.print("Input playlist id to open: ");
+                    Integer playlistID = States.sc.nextInt();
+
+                    States.playlistService.openPlaylist(playlistID);
+                    return WATCHING_PLAYLIST;
+                }
+                case 4 -> { // Delete a playlist
+                    System.out.print("Input playlist id to delete: ");
+                    Integer playlistID = States.sc.nextInt();
+
+                    States.playlistService.remove(playlistID);
+                    return this;
+                }
+                case 5 -> { // Go back
+                    States.playlistService.closePlaylist();
+                    return LOGGED_IN;
+                }
+                case 6 -> { // Exit program
                     return EXITED;
                 }
                 default -> {
@@ -232,6 +376,17 @@ public enum States {
             return null;
         }
     },
+    PROFILE {
+        @Override
+        int getTask() {
+            return 0;
+        }
+
+        @Override
+        States performTask(int task) {
+            return this;
+        }
+    },
     EXITED {
         @Override
         int getTask() {
@@ -246,7 +401,7 @@ public enum States {
 
     static PostService postService;
     static UserService userService;
-    static CommentService commentService;
+    static PlaylistService playlistService;
     static Scanner sc;
 
     States() {
@@ -258,7 +413,7 @@ public enum States {
     static {
         States.postService = PostService.getInstance();
         States.userService = UserService.getInstance();
-        States.commentService = CommentService.getInstance();
+        States.playlistService = PlaylistService.getInstance();
         States.sc = new Scanner(System.in);
     }
 }

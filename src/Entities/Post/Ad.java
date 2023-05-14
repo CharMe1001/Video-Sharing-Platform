@@ -45,6 +45,8 @@ public class Ad extends Post {
         return ret;
     }
 
+    public Integer getPosterID() { return null; }
+
     public String getColumns() {
         return super.getColumns() + ", companyName, link, text";
     }
@@ -60,8 +62,25 @@ public class Ad extends Post {
     protected void getDataFromSelect(ResultSet src) throws SQLException {
         super.getDataFromSelect(src);
 
-        this.companyName = src.getString("companyName");
-        this.link = src.getString("link");
-        this.text = src.getString("text");
+        try {
+            this.companyName = src.getString("companyName");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting the company name of ad with id = " + this.id + "!");
+            throw sqlE;
+        }
+
+        try {
+            this.link = src.getString("link");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting link of ad with id = " + this.id + "!");
+            throw sqlE;
+        }
+
+        try {
+            this.text = src.getString("text");
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting text of ad with id = " + this.id + "!");
+            throw sqlE;
+        }
     }
 }
