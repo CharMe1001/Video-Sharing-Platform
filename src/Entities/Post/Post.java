@@ -57,7 +57,7 @@ public abstract class Post extends BaseEntity {
     }
 
     public String getSQLUpdate(String className) {
-        return super.toSQLInsert(className) + ", name = '" + this.name + "', thumbnail = '" + this.thumbnail + "'";
+        return super.toSQLInsert(className) + "name = '" + this.name + "', thumbnail = '" + this.thumbnail + "'";
     }
 
     protected void getDataFromSelect(ResultSet src) throws SQLException {

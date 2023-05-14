@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Playlist extends BaseEntity {
@@ -42,12 +43,20 @@ public class Playlist extends BaseEntity {
 
     public String toString() {
         String ret = "Playlist \"" + this.name + "\"(id = " + this.id + "):\n";
-        if (this.videos == null) {
+        if (this.videos == null || this.videos.isEmpty()) {
             ret += "This playlist is empty.\n";
         } else {
             ret += this.videos.get(0).toString();
         }
         return ret;
+    }
+
+    public List<Video> getVideos() {
+        return this.videos;
+    }
+
+    public void switchOrdering() {
+        this.parseOrder = this.parseOrder == Order.NORMAL ? Order.SHUFFLE : Order.NORMAL;
     }
 
     public String getColumns() {
@@ -59,7 +68,7 @@ public class Playlist extends BaseEntity {
     }
 
     public String getSQLUpdate(String className) {
-        return super.getSQLUpdate(className) + ", name = '" + this.name + "', ownerID = " + this.ownerID + ", parseOrder = '" + this.parseOrder.name() + "'";
+        return super.getSQLUpdate(className) + "name = '" + this.name + "', ownerID = " + this.ownerID + ", parseOrder = '" + this.parseOrder.name() + "'";
     }
 
     protected void getDataFromSelect(ResultSet src) throws SQLException {
@@ -107,5 +116,17 @@ public class Playlist extends BaseEntity {
                 throw e;
             }
         }
+    }
+
+    public Integer getNext(Integer current) {
+        if (this.parseOrder == Order.NORMAL) {
+            return (current + 1) % this.videos.size();
+        } else {
+            return (new Random()).nextInt(this.videos.size() - 1);
+        }
+    }
+
+    public void removeVideo(int position) {
+        this.videos.remove(position);
     }
 }

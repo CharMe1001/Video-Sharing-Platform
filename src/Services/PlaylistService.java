@@ -3,13 +3,13 @@ package Services;
 import Entities.BaseEntity;
 import Entities.User.Playlist;
 
-import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class PlaylistService extends Service<Playlist>{
     private static PlaylistService instance = null;
@@ -22,12 +22,39 @@ public class PlaylistService extends Service<Playlist>{
     }
 
     private Playlist openPlaylist;
+    private Stack<Integer> pastPositions;
+    private Integer currentPosition;
 
     public PlaylistService() { openPlaylist = null; }
 
+    public Playlist getOpenPlaylist() {
+        return this.openPlaylist;
+    }
+
+    public Integer getOpenPlaylistID() {
+        if (this.openPlaylist == null) {
+            return null;
+        }
+        return this.openPlaylist.getID();
+    }
+
     public void openPlaylist(Integer id) {
         this.openPlaylist = this.get(id);
+        if (this.openPlaylist == null) {
+            return;
+        }
+
+        if (this.openPlaylist.getVideos().isEmpty()) {
+            System.out.println("This playlist is empty.");
+            this.openPlaylist = null;
+            return;
+        }
+
+        this.pastPositions = new Stack<>();
+        this.currentPosition = 0;
         System.out.println("Opened playlist with id = " + id + ".");
+        System.out.println("Currently watching:");
+        System.out.println(this.openPlaylist.getVideos().get(this.currentPosition));
     }
 
     public void closePlaylist() {
@@ -89,6 +116,10 @@ public class PlaylistService extends Service<Playlist>{
 
     public Playlist get(Integer id) {
         Playlist playlist = super.get(id);
+        if (playlist == null) {
+            return null;
+        }
+
         this.selectVideos(playlist);
 
         return playlist;
@@ -112,5 +143,64 @@ public class PlaylistService extends Service<Playlist>{
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public void switchOrdering() {
+        this.getOpenPlaylist().switchOrdering();
+
+        if (!this.set(this.getOpenPlaylist())) {
+            this.getOpenPlaylist().switchOrdering();
+        }
+    }
+
+    public void previousVideo() {
+        if (this.pastPositions.isEmpty()) {
+            System.out.println("There is no previous video!");
+            return;
+        }
+
+        this.currentPosition = this.pastPositions.pop();
+        System.out.println("Currently watching:");
+        System.out.println(this.openPlaylist.getVideos().get(this.currentPosition));
+    }
+
+    public void nextVideo() {
+        this.pastPositions.push(this.currentPosition);
+        this.currentPosition = this.openPlaylist.getNext(this.currentPosition);
+
+        System.out.println("Currently watching:");
+        System.out.println(this.openPlaylist.getVideos().get(this.currentPosition));
+    }
+
+    public void setVideo(Integer position) {
+        this.currentPosition = position;
+
+        System.out.println("Currently watching:");
+        System.out.println(this.openPlaylist.getVideos().get(this.currentPosition));
+    }
+
+    public void removeCurrentVideo() {
+        Integer videoID = this.openPlaylist.getVideos().get(this.currentPosition).getID();
+        String sqlDelete = "DELETE FROM PLAYLISTCONTENT WHERE postID = " + videoID;
+
+        try {
+            Statement deleteStmt = Service.connection.createStatement();
+            deleteStmt.executeUpdate(sqlDelete);
+        } catch (SQLException sqlE) {
+            System.out.println("Error removing video with id = " + videoID + " from playlist with id = " + this.getOpenPlaylistID() + "!");
+            System.out.println("Delete statement: " + sqlDelete);
+            System.out.println(sqlE.getMessage());
+
+            return;
+        }
+
+        this.openPlaylist.removeVideo(this.currentPosition);
+        if (this.openPlaylist.getVideos().isEmpty()) {
+            this.openPlaylist = null;
+            return;
+        }
+
+        --this.currentPosition;
+        this.nextVideo();
     }
 }

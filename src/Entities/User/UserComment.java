@@ -78,7 +78,7 @@ public class UserComment extends BaseEntity {
     }
 
     public String getSQLUpdate(String className) {
-        return super.getSQLUpdate(className) + ", userID = " + this.userID + ", postID = " + this.postID + ", text = '" + this.text + "', parentID = " + (this.parentID == null ? "null" : this.parentID);
+        return super.getSQLUpdate(className) + "userID = " + this.userID + ", postID = " + this.postID + ", text = '" + this.text + "', parentID = " + (this.parentID == null ? "null" : this.parentID);
     }
 
     protected void getDataFromSelect(ResultSet src) throws SQLException {

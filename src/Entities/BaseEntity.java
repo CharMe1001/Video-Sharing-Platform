@@ -25,7 +25,7 @@ public abstract class BaseEntity {
     }
 
     public String getSQLUpdate(String className) {
-        return "UPDATE " + className + " SET id = " + this.id;
+        return "UPDATE " + className + " SET ";
     }
 
     public static BaseEntity getFromSelect(ResultSet src) throws SQLException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {

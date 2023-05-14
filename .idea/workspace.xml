@@ -5,25 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="61dfc136-7d83-4f99-8ee4-645679704a94" name="Changes" comment="Completed all services besides playlist functionality.">
-      <change afterPath="$PROJECT_DIR$/src/Services/PlaylistService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Entities/BaseEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entities/BaseEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entities/Post/Ad.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entities/Post/Ad.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entities/Post/CommunityPost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entities/Post/CommunityPost.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entities/Post/Poll.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entities/Post/Poll.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Entities/Post/Post.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entities/Post/Post.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entities/Post/Short.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entities/Post/Short.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entities/Post/UserPost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entities/Post/UserPost.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entities/Post/Video.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entities/Post/Video.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Entities/User/Person.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entities/User/Person.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Entities/User/Playlist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entities/User/Playlist.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Entities/User/UserComment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entities/User/UserComment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Services/CommentService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Services/JDBCUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/JDBCUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Services/PlaylistService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/PlaylistService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Services/PostService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/PostService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Services/Service.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/Service.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/UserService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/StateManager/States.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/StateManager/States.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -116,7 +106,7 @@
       <workItem from="1683793757095" duration="3000" />
       <workItem from="1683793881029" duration="14048000" />
       <workItem from="1683876785540" duration="34227000" />
-      <workItem from="1684066149485" duration="8715000" />
+      <workItem from="1684066149485" duration="16032000" />
     </task>
     <task id="LOCAL-00001" summary="Start">
       <created>1680723633193</created>
@@ -180,7 +170,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/Services/PostService.java</url>
-          <line>344</line>
+          <line>347</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>

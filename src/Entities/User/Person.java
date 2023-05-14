@@ -66,7 +66,7 @@ public class Person extends BaseEntity {
     }
 
     public String getSQLUpdate(String className) {
-        return super.getSQLUpdate(className) + ", name = '" + this.name + "', email = '" + this.email + "'";
+        return super.getSQLUpdate(className) + "name = '" + this.name + "', email = '" + this.email + "'";
     }
 
     protected void getDataFromSelect(ResultSet src) throws SQLException {

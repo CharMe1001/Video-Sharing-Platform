@@ -88,6 +88,9 @@ public class PostService extends Service<Post> {
 
     public Post get(Integer id) {
         Post post = super.get(id);
+        if (post == null) {
+            return null;
+        }
 
         if (post instanceof Poll) {
             this.getPollOptions((Poll) post);

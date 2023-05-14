@@ -78,7 +78,7 @@ public abstract class Service<T extends BaseEntity> {
         }
     }
 
-    public void set(T item) {
+    public boolean set(T item) {
         String updateQuery = item.getSQLUpdate(this.getGenericName()) + " WHERE id = " + item.getID();
         int cntUpdated;
 
@@ -92,7 +92,7 @@ public abstract class Service<T extends BaseEntity> {
             System.out.println(item);
 
             System.out.println(sqlE.getMessage());
-            return;
+            return false;
         }
 
         if (cntUpdated == 0) {
@@ -101,6 +101,7 @@ public abstract class Service<T extends BaseEntity> {
             System.out.println("Successfully updated " + this.getGenericName() + " with id = " + item.getID() + ".");
         }
 
+        return true;
     }
 
     public T get(Integer id) {

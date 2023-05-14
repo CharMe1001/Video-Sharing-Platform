@@ -159,6 +159,10 @@ public enum States {
                     Integer id = States.sc.nextInt();
 
                     States.postService.openPost(id);
+                    if (States.postService.getCurrentPost() == null) {
+                        return this;
+                    }
+
                     System.out.println(States.postService.getCurrentPost());
                     return WATCHING_POST;
                 }
@@ -342,6 +346,10 @@ public enum States {
                     Integer playlistID = States.sc.nextInt();
 
                     States.playlistService.openPlaylist(playlistID);
+                    if (States.playlistService.getOpenPlaylist() == null) {
+                        return this;
+                    }
+
                     return WATCHING_PLAYLIST;
                 }
                 case 4 -> { // Delete a playlist
@@ -368,12 +376,84 @@ public enum States {
     WATCHING_PLAYLIST {
         @Override
         int getTask() {
-            return 0;
+            Integer playlistID = States.playlistService.getOpenPlaylistID();
+            if (playlistID == null) {
+                System.out.println("There is no playlist open right now.");
+                return 7;
+            }
+
+            int task;
+
+            System.out.println("""
+                        Input a task:
+                        \t1. Show all videos;
+                        \t2. Switch ordering method;
+                        \t3. Go to previous video;
+                        \t4. Go to next video;
+                        \t5. Go to video by id;
+                        \t6. Remove video from playlist;
+                        \t7. Exit playlist;
+                        \t8. Exit program.""");
+            task = States.sc.nextInt();
+            States.sc.nextLine();
+
+            return task;
         }
 
         @Override
         States performTask(int task) {
-            return null;
+            switch (task) {
+                case 1 -> { // Show all videos
+                    System.out.println("Videos:");
+                    List<Video> videos = States.playlistService.getOpenPlaylist().getVideos();
+
+                    for (Video video: videos) {
+                        System.out.println(video);
+                    }
+
+                    return this;
+                }
+                case 2 -> { // Switch ordering method
+                    States.playlistService.switchOrdering();
+
+                    return this;
+                }
+                case 3 -> { // Go to previous video
+                    States.playlistService.previousVideo();
+
+                    return this;
+                }
+                case 4 -> { // Go to next video
+                    States.playlistService.nextVideo();
+
+                    return this;
+                }
+                case 5 -> { // Go to video by id
+                    System.out.print("Input id position of video between 1 and " + States.playlistService.getOpenPlaylist().getVideos().size() + ": ");
+                    int position = States.sc.nextInt();
+                    if (position < 1 || position > States.playlistService.getOpenPlaylist().getVideos().size()) {
+                        System.out.println("Wrong position index.");
+                        return this;
+                    }
+
+                    States.playlistService.setVideo(position - 1);
+                    return this;
+                }
+                case 6 -> { // Remove video from playlist
+                    States.playlistService.removeCurrentVideo();
+                    return this;
+                }
+                case 7 -> { // Exit playlist
+                    return PLAYLIST_MENU;
+                }
+                case 8 -> { // Exit program
+                    return EXITED;
+                }
+                default -> {
+                    System.out.println("Wrong task. Try again.");
+                    return this;
+                }
+            }
         }
     },
     PROFILE {
