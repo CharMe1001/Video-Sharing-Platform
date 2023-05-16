@@ -51,6 +51,14 @@ public class Playlist extends BaseEntity {
         return ret;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(String newName) {
+        this.name = newName;
+    }
+
     public List<Video> getVideos() {
         return this.videos;
     }

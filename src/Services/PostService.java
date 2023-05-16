@@ -308,21 +308,6 @@ public class PostService extends Service<Post> {
         }
     }
 
-    public void addToPlaylist(Integer playlistID) {
-        String sqlInsert = "INSERT INTO PLAYLISTCONTENT(postID, playlistID) VALUES(" + this.getCurrentPostID() + ", " + playlistID + ")";
-
-        try {
-            Statement insertStmt = Service.connection.createStatement();
-            insertStmt.executeUpdate(sqlInsert);
-        } catch (SQLException sqlE) {
-            System.out.println("Error inserting video with id = " + this.getCurrentPostID() + " to playlist with id = " + playlistID + "!");
-            System.out.println(sqlE.getMessage());
-            return;
-        }
-
-        System.out.println("Successfully added this post to playlist with id = " + playlistID + ".");
-    }
-
     private void insertComment(UserComment comment) {
         String sqlInsert = comment.toSQLInsert(comment.getClass().getSimpleName().toUpperCase());
         PreparedStatement commentStmt;

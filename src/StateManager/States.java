@@ -7,8 +7,6 @@ import Entities.User.UserComment;
 import Services.*;
 import Entities.User.Person;
 
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import java.util.*;
 
 public enum States {
@@ -201,6 +199,7 @@ public enum States {
         @Override
         States performTask(int task) {
             Integer userID = States.userService.getLoggedUserID();
+            Integer postID = States.postService.getCurrentPostID();
 
             switch (task) {
                 case 1 -> { // Subscribe/Unsubscribe from user
@@ -243,7 +242,7 @@ public enum States {
                         return this;
                     }
 
-                    States.postService.addToPlaylist(playlistID);
+                    States.playlistService.addVideo(postID, playlistID);
                     return this;
                 }
                 case 5 -> { // Close the current post
@@ -379,8 +378,9 @@ public enum States {
                         \t4. Go to next video;
                         \t5. Go to video by id;
                         \t6. Remove video from playlist;
-                        \t7. Exit playlist;
-                        \t8. Exit program.""");
+                        \t7. Change the name of the playlist;
+                        \t8. Exit playlist;
+                        \t9. Exit program.""");
             task = States.sc.nextInt();
             States.sc.nextLine();
 
@@ -430,10 +430,22 @@ public enum States {
                     States.playlistService.removeCurrentVideo();
                     return this;
                 }
-                case 7 -> { // Exit playlist
+                case 7 -> { // Change the name of the playlist
+                    System.out.print("Input new name for playlist: ");
+                    String newName = States.sc.nextLine();
+
+                    String oldName = States.playlistService.getOpenPlaylist().getName();
+                    States.playlistService.getOpenPlaylist().setName(newName);
+                    if (!States.playlistService.set(States.playlistService.getOpenPlaylist())) {
+                        States.playlistService.getOpenPlaylist().setName(oldName);
+                    }
+
+                    return this;
+                }
+                case 8 -> { // Exit playlist
                     return PLAYLIST_MENU;
                 }
-                case 8 -> { // Exit program
+                case 9 -> { // Exit program
                     return EXITED;
                 }
                 default -> {

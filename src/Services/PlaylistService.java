@@ -61,6 +61,45 @@ public class PlaylistService extends Service<Playlist>{
         this.openPlaylist = null;
     }
 
+    public void addVideo(Integer videoID, Integer playlistID) {
+        Statement stmt;
+
+        try {
+            stmt = Service.connection.createStatement();
+        } catch (SQLException sqlE) {
+            System.out.println("Error creating jdbc statement!");
+            System.out.println(sqlE.getMessage());
+            return;
+        }
+
+        String sqlGetPost = "SELECT DISTINCT 1 FROM PLAYLISTCONTENT WHERE postID = " + videoID + " AND playlistID = " + playlistID;
+        try {
+            ResultSet res = stmt.executeQuery(sqlGetPost);
+
+            if (res.next()) {
+                throw new SQLException("Video with id = " + videoID + " is already in playlist with id = " + playlistID + "!");
+            }
+        } catch (SQLException sqlE) {
+            System.out.println("Error adding video with id = " + videoID + " to playlist with id = " + playlistID + "!");
+            System.out.println("Select statement: " + sqlGetPost);
+            System.out.println(sqlE.getMessage());
+            return;
+        }
+
+        String sqlInsert = "INSERT INTO PLAYLISTCONTENT(postID, playlistID) VALUES(" + videoID + ", " + playlistID + ")";
+
+        try {
+            Statement insertStmt = Service.connection.createStatement();
+            insertStmt.executeUpdate(sqlInsert);
+        } catch (SQLException sqlE) {
+            System.out.println("Error inserting video with id = " + videoID + " to playlist with id = " + playlistID + "!");
+            System.out.println(sqlE.getMessage());
+            return;
+        }
+
+        System.out.println("Successfully added this post to playlist with id = " + playlistID + ".");
+    }
+
     public List<Playlist> getAllFromUser(Integer ownerID) {
         String sqlGet = "SELECT * FROM PLAYLIST WHERE ownerID = " + ownerID;
         ResultSet res;
