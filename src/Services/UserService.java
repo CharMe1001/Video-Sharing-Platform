@@ -1,12 +1,16 @@
 package Services;
 
 import Entities.BaseEntity;
+import Entities.Post.Post;
 import Entities.User.Person;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Scanner;
 
 public class UserService extends Service<Person> {
     private static UserService instance = null;
@@ -160,5 +164,189 @@ public class UserService extends Service<Person> {
             System.out.println("Error updating subscription status of user with id = " + this.getLoggedUserID() + " to user with id = " + subscribedID + "!");
             System.out.println(sqlE.getMessage());
         }
+    }
+
+    public Integer getNumberOfSubscribers() {
+        String sqlGet = "SELECT COUNT(*) AS cnt FROM SUBSCRIBEDTO WHERE subscribedID = " + this.getLoggedUserID();
+        ResultSet res;
+
+        try {
+            Statement getStmt = Service.connection.createStatement();
+            res = getStmt.executeQuery(sqlGet);
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting number of subscribers for user with id = " + this.getLoggedUserID() + "!");
+            System.out.println("Get statement = " + sqlGet);
+            System.out.println(sqlE.getMessage());
+            return null;
+        }
+
+        try {
+            if (res.next()) {
+                return res.getInt("cnt");
+            } else {
+                throw new SQLException("Error retrieving number of subscribers of user with id = " + this.getLoggedUserID() + " from ResultSet object!");
+            }
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting number of subscribers for user with id = " + this.getLoggedUserID() + "!");
+            System.out.println(sqlE.getMessage());
+            return null;
+        }
+    }
+
+    public List<Person> getPeopleSubscribedTo() {
+        String sqlGet = "SELECT * FROM SUBSCRIBEDTO WHERE subscriberID = " + this.getLoggedUserID();
+        ResultSet res;
+
+        try {
+            Statement getStmt = Service.connection.createStatement();
+            res = getStmt.executeQuery(sqlGet);
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting people user with id = " + this.getLoggedUserID() + " is subscribed to!");
+            System.out.println("Get statement: " + sqlGet);
+            System.out.println(sqlE.getMessage());
+
+            return null;
+        }
+
+        try {
+            List<Person> people = new ArrayList<>();
+
+            while (true) {
+                try {
+                    if (!res.next()) {
+                        break;
+                    }
+                } catch (SQLException sqlE) {
+                    System.out.println("Error retrieving next user that user with id = " + this.getLoggedUserID() + " is subscribed to!");
+                    throw sqlE;
+                }
+
+                people.add((Person)BaseEntity.getFromSelect(res));
+            }
+            return people;
+        } catch (Exception e) {
+            System.out.println("Error getting list of users that user with id = " + this.getLoggedUserID() + " is subscribed to!");
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public List<Post> getOwnPosts() {
+        String sqlGet = "SELECT * FROM POST WHERE posterID = " + this.getLoggedUserID();
+        ResultSet res;
+
+        try {
+            Statement getStmt = Service.connection.createStatement();
+            res = getStmt.executeQuery(sqlGet);
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting list of posts that user with id = " + this.getLoggedUserID() + " owns!");
+            System.out.println("Get statement: " + sqlGet);
+            System.out.println(sqlE.getMessage());
+            return null;
+        }
+
+        try {
+            List<Post> posts = new ArrayList<>();
+
+            while (true) {
+                try {
+                    if (!res.next()) {
+                        break;
+                    }
+                } catch (SQLException sqlE) {
+                    System.out.println("Error retrieving next post that user with id = " + this.getLoggedUserID() + " owns!");
+                    throw sqlE;
+                }
+
+                posts.add((Post)BaseEntity.getFromSelect(res));
+            }
+
+            return posts;
+        } catch (Exception e) {
+            System.out.println("Error getting list of posts that user with id = " + this.getLoggedUserID() + " owns!");
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public List<Post> getHistory() {
+        String sqlGet = "SELECT * FROM HISTORY h JOIN POST p ON p.id = h.postID WHERE userID = " + this.getLoggedUserID() + " ORDER BY dateAccessed DESC";
+        ResultSet res;
+
+        try {
+            Statement getStmt = Service.connection.createStatement();
+            res = getStmt.executeQuery(sqlGet);
+        } catch (SQLException sqlE) {
+            System.out.println("Error getting post history of user with id = " + this.getLoggedUserID() + "!");
+            System.out.println("Get statement: " + sqlGet);
+            System.out.println(sqlE.getMessage());
+            return null;
+        }
+
+        try {
+            List<Post> history = new ArrayList<>();
+            while (true) {
+                try {
+                    if (!res.next()) {
+                        break;
+                    }
+                } catch (SQLException sqlE) {
+                    System.out.println("Error retrieving next post from the history of user with id = " + this.getLoggedUserID() + "!");
+                    throw sqlE;
+                }
+
+                history.add((Post)BaseEntity.getFromSelect(res));
+            }
+
+            return history;
+        } catch (Exception e) {
+            System.out.println("Error getting post history of user with id = " + this.getLoggedUserID() + "!");
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public void updateDetails(Scanner sc) {
+        System.out.println("Input the requested changes or nothing if you want to keep it:");
+        System.out.print("Input new name: ");
+        String newName = sc.nextLine();
+        System.out.println("Input new password: ");
+        String newPassword = sc.nextLine();
+        System.out.println("Input new email: ");
+        String newEmail = sc.nextLine();
+
+        if (Objects.equals(newName, "")) {
+            newName = this.logged_user.getName();
+        }
+
+        if (Objects.equals(newEmail, "")) {
+            newEmail = this.logged_user.getEmail();
+        }
+
+        Person newPerson = new Person(newName, "", newEmail);
+        newPerson.setID(this.getLoggedUserID());
+
+        if (this.set(newPerson)) {
+            this.logged_user = newPerson;
+        }
+
+        if (!Objects.equals(newPassword, "")) {
+            String sqlUpdate = "UPDATE PERSON SET password = " + newPassword + " WHERE id = " + this.getLoggedUserID();
+            Integer rowsUpdated;
+
+            try {
+                Statement updateStmt = Service.connection.createStatement();
+                rowsUpdated = updateStmt.executeUpdate(sqlUpdate);
+                if (rowsUpdated == 0) {
+                    throw new SQLException("Password of user = " + this.getLoggedUserID() + " has not been updated!");
+                }
+            } catch (SQLException sqlE) {
+                System.out.println("Error updating password of user with id = " + this.getLoggedUserID() + "!");
+                System.out.println("Update statement: " + sqlUpdate);
+                System.out.println(sqlE.getMessage());
+            }
+
+        }
+
     }
 }

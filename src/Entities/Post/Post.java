@@ -57,7 +57,7 @@ public abstract class Post extends BaseEntity {
     }
 
     public String getSQLUpdate(String className) {
-        return super.toSQLInsert(className) + "name = '" + this.name + "', thumbnail = '" + this.thumbnail + "'";
+        return super.getSQLUpdate(className) + "name = '" + this.name + "', thumbnail = '" + this.thumbnail + "'";
     }
 
     protected void getDataFromSelect(ResultSet src) throws SQLException {
@@ -129,6 +129,10 @@ public abstract class Post extends BaseEntity {
         return comments;
     }
 
+    public void putInCommentTree(Integer k) {
+        this.commentTree.put(k, new ArrayList<>());
+    }
+
     public boolean addComment(UserComment comment) {
         if (comment.getParentID() == null || this.commentTree.containsKey(comment.getParentID())) {
             if (comment.getParentID() == null) {
@@ -136,11 +140,14 @@ public abstract class Post extends BaseEntity {
             }
 
             this.commentTree.get(comment.getParentID() == null ? 0 : comment.getParentID()).add(comment);
-            this.commentTree.put(comment.getID(), new ArrayList<>());
             return true;
         }
 
         return false;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

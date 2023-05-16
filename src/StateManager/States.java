@@ -116,12 +116,10 @@ public enum States {
                 System.out.println("""
                         Input a task:
                         \t1. Show post feed;
-                        \t2. Show all of your posts;
-                        \t3. Create a new post;
-                        \t4. Open a post;
-                        \t5. Show history;
-                        \t6. Go back;
-                        \t7. Exit program.""");
+                        \t2. Create a new post;
+                        \t3. Open a post;
+                        \t4. Go back;
+                        \t5. Exit program.""");
             task = States.sc.nextInt();
             States.sc.nextLine();
 
@@ -141,39 +139,28 @@ public enum States {
 
                     return this;
                 }
-                case 2 -> { // Show all of your posts
-                    System.out.println("Your posts:");
-                    List<Post> posts = States.postService.getAllFromUser(userID);
-                    for (Post post : posts) {
-                        System.out.println(post);
-                    }
-
-                    return this;
-                }
-                case 3 -> { // Create a new post
+                case 2 -> { // Create a new post
                     States.postService.add(States.sc, userID);
                     return this;
                 }
-                case 4 -> { // Open a post
+                case 3 -> { // Open a post
                     System.out.print("Input post id to open: ");
                     Integer id = States.sc.nextInt();
 
                     States.postService.openPost(id);
                     if (States.postService.getCurrentPost() == null) {
+
                         return this;
                     }
 
+                    States.postService.addToHistory(userID);
                     System.out.println(States.postService.getCurrentPost());
                     return WATCHING_POST;
                 }
-                case 5 -> { // Show history
-                    System.out.println("Will implement showing history later.");
-                    return this;
-                }
-                case 6 -> { // Go back
+                case 4 -> { // Go back
                     return LOGGED_IN;
                 }
-                case 7 -> { // Exit program
+                case 5 -> { // Exit program
                     return EXITED;
                 }
                 default -> {
@@ -459,12 +446,134 @@ public enum States {
     PROFILE {
         @Override
         int getTask() {
-            return 0;
+            int task;
+
+            System.out.println("""
+                        Input a task:
+                        \t1. Show number of subscribers;
+                        \t2. Show users you are subscribed to;
+                        \t3. Show your posts;
+                        \t4. Change a posts name;
+                        \t5. Delete a post;
+                        \t6. Show your history;
+                        \t7. Change account details;
+                        \t8. Delete your account;
+                        \t9. Exit profile;
+                        \t10. Exit program.""");
+            task = States.sc.nextInt();
+            States.sc.nextLine();
+
+            return task;
         }
 
         @Override
         States performTask(int task) {
-            return this;
+            switch (task) {
+                case 1 -> { // Show number of subscribers
+                    Integer numberOfSubscribers = States.userService.getNumberOfSubscribers();
+                    if (numberOfSubscribers != null) {
+                        System.out.println("Congrats! You currently have " + numberOfSubscribers + " subscribers!");
+                    }
+
+                    return this;
+                }
+                case 2 -> { // Show users you are subscribed to
+                    List<Person> people = States.userService.getPeopleSubscribedTo();
+                    if (people != null) {
+                        System.out.println("You are currently subscribed to:");
+
+                        for (Person person: people) {
+                            System.out.println(person);
+                        }
+                    }
+
+                    return this;
+                }
+                case 3 -> { // Show your posts
+                    List<Post> posts = States.userService.getOwnPosts();
+                    if (posts != null) {
+                        System.out.println("You currently own the following posts:");
+
+                        for (Post post: posts) {
+                            System.out.println(post);
+                        }
+                    }
+
+                    return this;
+                }
+                case 4 -> { // Change a posts name
+                    System.out.print("Input the id of the post whose title you want to change: ");
+                    Integer postID = States.sc.nextInt();
+                    States.sc.nextLine();
+
+                    Post post = States.postService.get(postID);
+                    if (post == null) {
+                        return this;
+                    }
+
+                    if (!Objects.equals(post.getPosterID(), States.userService.getLoggedUserID())) {
+                        System.out.println("This post does not belong to you!");
+                        return this;
+                    }
+
+                    System.out.println("Input the new name of this post:");
+                    System.out.println(post);
+                    String oldName = post.getName();
+                    String newName = States.sc.nextLine();
+                    post.setName(newName);
+                    if (!States.postService.set(post)) {
+                        post.setName(oldName);
+                    }
+
+                    return this;
+                }
+                case 5 -> { // Delete a post
+                    System.out.print("Input post id to delete: ");
+                    Integer postID = States.sc.nextInt();
+                    States.sc.nextLine();
+
+                    Post post = States.postService.get(postID);
+                    if (post != null) {
+                        if (!Objects.equals(post.getPosterID(), States.userService.getLoggedUserID())) {
+                            System.out.println("This post does not belong to you!");
+                            return this;
+                        }
+
+                        States.postService.remove(postID);
+                    }
+
+                    return this;
+                }
+                case 6 -> { // Show your history
+                    List<Post> history = States.userService.getHistory();
+                    if (history != null) {
+                        System.out.println("Post history:");
+                        for (Post post: history) {
+                            System.out.println(post);
+                        }
+                    }
+
+                    return this;
+                }
+                case 7 -> { // Change account details
+                    States.userService.updateDetails(States.sc);
+                    return this;
+                }
+                case 8 -> { // Delete your account
+                    States.userService.deleteAccount();
+                    return NOT_LOGGED;
+                }
+                case 9 -> { // Exit profile
+                    return LOGGED_IN;
+                }
+                case 10 -> { // Exit program
+                    return EXITED;
+                }
+                default -> {
+                    System.out.println("Wrong task. Try again.");
+                    return this;
+                }
+            }
         }
     },
     EXITED {
@@ -488,7 +597,7 @@ public enum States {
     }
 
     abstract int getTask();
-    abstract States performTask(int task) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException;
+    abstract States performTask(int task);
 
     static {
         States.postService = PostService.getInstance();

@@ -20,7 +20,7 @@ public class StateManager {
         return stateManager;
     }
 
-    public void loop() throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void loop() {
         while (true) {
             if (this.state == States.EXITED) {
                 return;

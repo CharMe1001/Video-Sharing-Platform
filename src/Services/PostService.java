@@ -5,6 +5,7 @@ import Entities.Post.*;
 import Entities.Post.Short;
 import Entities.User.UserComment;
 
+import javax.swing.plaf.nimbus.State;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,6 +35,18 @@ public class PostService extends Service<Post> {
         this.openPost = this.get(id);
     }
 
+    public void addToHistory(Integer userID) {
+        String sqlInsert = "INSERT INTO HISTORY(userID, postID) VALUES(" + userID + ", " + this.getCurrentPostID() + ")";
+
+        try {
+            Statement insertStmt = Service.connection.createStatement();
+            insertStmt.executeQuery(sqlInsert);
+        } catch (SQLException sqlE) {
+            System.out.println("Error inserting user access of post into history!");
+            System.out.println(sqlE.getMessage());
+        }
+    }
+
     public void closePost() {
         this.openPost = null;
     }
@@ -44,15 +57,6 @@ public class PostService extends Service<Post> {
 
     public Post getCurrentPost() {
         return this.openPost;
-    }
-
-    public String getPostName(Integer id) {
-        Post post = this.get(id);
-        if (post == null) {
-            return "Post with id " + id + " doesn't exist.";
-        }
-
-        return post.getName();
     }
 
     private void getPollOptions(Poll poll) {
@@ -350,8 +354,9 @@ public class PostService extends Service<Post> {
         this.getCurrentPost().addComment(comment);
 
         this.insertComment(comment);
+        this.getCurrentPost().putInCommentTree(comment.getID());
 
-        System.out.println("Successfully replied to comment with id = " + comment.getParentID() + ".");
+        System.out.println("Successfully commented on post with id = " + this.getCurrentPostID() + ".");
     }
 
     public void addComment(Scanner sc, Integer userID, Integer parentID) {
@@ -364,6 +369,7 @@ public class PostService extends Service<Post> {
         }
 
         this.insertComment(comment);
+        this.getCurrentPost().putInCommentTree(comment.getID());
 
         System.out.println("Successfully replied to comment with id = " + comment.getParentID() + ".");
 
