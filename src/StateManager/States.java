@@ -29,7 +29,7 @@ public enum States {
                     Person person = new Person();
                     person.read(States.sc);
 
-                    States.userService.register(person);
+                    UserService.getInstance().register(person);
                     return this;
                 }
                 case 2 -> { // Login
@@ -39,9 +39,9 @@ public enum States {
                     System.out.print("Input password: ");
                     String password = States.sc.next();
 
-                    States.userService.login(email, password);
+                    UserService.getInstance().login(email, password);
 
-                    if (States.userService.getLoggedUserID() == null) {
+                    if (UserService.getInstance().getLoggedUserID() == null) {
                         return this;
                     }
                     return LOGGED_IN;
@@ -59,10 +59,10 @@ public enum States {
     LOGGED_IN {
         @Override
         int getTask() {
-            Integer userID = States.userService.getLoggedUserID();
+            Integer userID = UserService.getInstance().getLoggedUserID();
             if (userID == null) {
                 System.out.println("No user logged in.");
-                return 5;
+                return 4;
             }
 
             int task;
@@ -93,7 +93,7 @@ public enum States {
                     return PROFILE;
                 }
                 case 4 -> { // Logout
-                    States.userService.logout();
+                    UserService.getInstance().logout();
                     return NOT_LOGGED;
                 }
                 case 5 -> { // Exit the program
@@ -126,33 +126,35 @@ public enum States {
 
         @Override
         States performTask(int task) {
-            Integer userID = States.userService.getLoggedUserID();
+            Integer userID = UserService.getInstance().getLoggedUserID();
 
             switch (task) {
                 case 1 -> { // Show post feed
-                    List<Post> posts = States.postService.getAll();
+                    List<Post> posts = PostService.getInstance().getAll();
                     for (Post post : posts) {
                         System.out.println(post);
                     }
+                    AuditService.getInstance().writeAction("User with id " + userID + " has requested the post feed.");
 
                     return this;
                 }
                 case 2 -> { // Create a new post
-                    States.postService.add(States.sc, userID);
+                    PostService.getInstance().add(States.sc, userID);
+
                     return this;
                 }
                 case 3 -> { // Open a post
                     System.out.print("Input post id to open: ");
                     Integer id = States.sc.nextInt();
 
-                    States.postService.openPost(id);
-                    if (States.postService.getCurrentPost() == null) {
-
+                    PostService.getInstance().openPost(id);
+                    if (PostService.getInstance().getCurrentPost() == null) {
                         return this;
                     }
 
-                    States.postService.addToHistory(userID);
-                    System.out.println(States.postService.getCurrentPost());
+                    PostService.getInstance().addToHistory(userID);
+                    System.out.println(PostService.getInstance().getCurrentPost());
+                    AuditService.getInstance().writeAction("User with id " + userID + " has opened post with id " + id + ".");
                     return WATCHING_POST;
                 }
                 case 4 -> { // Go back
@@ -171,7 +173,7 @@ public enum States {
     WATCHING_POST {
         @Override
         int getTask() {
-            Integer postID = States.postService.getCurrentPostID();
+            Integer postID = PostService.getInstance().getCurrentPostID();
             if (postID == null) {
                 System.out.println("There is no post opened");
                 return 5;
@@ -198,38 +200,38 @@ public enum States {
 
         @Override
         States performTask(int task) {
-            Integer userID = States.userService.getLoggedUserID();
-            Integer postID = States.postService.getCurrentPostID();
+            Integer userID = UserService.getInstance().getLoggedUserID();
+            Integer postID = PostService.getInstance().getCurrentPostID();
 
             switch (task) {
                 case 1 -> { // Subscribe/Unsubscribe from user
-                    Integer posterID = States.postService.getCurrentPost().getPosterID();
+                    Integer posterID = PostService.getInstance().getCurrentPost().getPosterID();
                     if (posterID == null) {
                         System.out.println("This is an ad. You cannot subscribe to its poster.");
                         return this;
                     }
 
-                    States.userService.subscribeTo(posterID);
+                    UserService.getInstance().subscribeTo(posterID);
 
                     return this;
                 }
                 case 2 -> { // Like the current post
-                    States.postService.like(userID);
+                    PostService.getInstance().like(userID);
                     return this;
                 }
                 case 3 -> { // Dislike the current post
-                    States.postService.dislike(userID);
+                    PostService.getInstance().dislike(userID);
                     return this;
                 }
                 case 4 -> { // Add to a playlist
-                    Post post = States.postService.getCurrentPost();
+                    Post post = PostService.getInstance().getCurrentPost();
                     if (!(post instanceof Video)) {
                         System.out.println("You cannot add a " + post.getClass().getSimpleName() +" to a playlist; it needs to be a Video!");
                         return this;
                     }
 
                     System.out.println("Your playlists:");
-                    List<Playlist> playlists = States.playlistService.getAllFromUser(userID);
+                    List<Playlist> playlists = PlaylistService.getInstance().getAllFromUser(userID);
                     for (Playlist playlist: playlists) {
                         System.out.println(playlist);
                     }
@@ -242,17 +244,17 @@ public enum States {
                         return this;
                     }
 
-                    States.playlistService.addVideo(postID, playlistID);
+                    PlaylistService.getInstance().addVideo(postID, playlistID);
                     return this;
                 }
                 case 5 -> { // Close the current post
-                    States.postService.closePost();
+                    PostService.getInstance().closePost();
                     return POST_MENU;
                 }
                 case 6 -> { // Show the comments
                     System.out.println("Comments:");
 
-                    List<UserComment> comments = States.postService.getCurrentPost().getComments();
+                    List<UserComment> comments = PostService.getInstance().getCurrentPost().getComments();
                     Stack<Integer> hierarchy = new Stack<>();
 
                     for (UserComment comment: comments) {
@@ -264,11 +266,12 @@ public enum States {
                         System.out.println();
                         hierarchy.push(comment.getID());
                     }
+                    AuditService.getInstance().writeAction("User with id " + userID + " has accessed the comments of post with id " + postID + ".");
 
                     return this;
                 }
                 case 7 -> { // Add a comment
-                    States.postService.addComment(States.sc, userID);
+                    PostService.getInstance().addComment(States.sc, userID);
                     return this;
                 }
                 case 8 -> { // Reply to a comment
@@ -276,7 +279,7 @@ public enum States {
                     Integer parentID = States.sc.nextInt();
                     States.sc.nextLine();
 
-                    States.postService.addComment(States.sc, userID, parentID);
+                    PostService.getInstance().addComment(States.sc, userID, parentID);
                     return this;
                 }
                 case 9 -> { // Exit the program
@@ -310,11 +313,11 @@ public enum States {
 
         @Override
         States performTask(int task) {
-            Integer userID = States.userService.getLoggedUserID();
+            Integer userID = UserService.getInstance().getLoggedUserID();
 
             switch(task) {
                 case 1 -> { // Show all of your playlists
-                    List<Playlist> playlists =  States.playlistService.getAllFromUser(userID);
+                    List<Playlist> playlists =  PlaylistService.getInstance().getAllFromUser(userID);
 
                     System.out.println("Your playlists:");
                     for (Playlist playlist: playlists) {
@@ -324,29 +327,31 @@ public enum States {
                     return this;
                 }
                 case 2 -> { // Create a new playlist
-                    States.playlistService.add(States.sc, userID);
+                    PlaylistService.getInstance().add(States.sc, userID);
                     return this;
                 }
                 case 3 -> { // Open a playlist
                     System.out.print("Input playlist id to open: ");
                     Integer playlistID = States.sc.nextInt();
 
-                    States.playlistService.openPlaylist(playlistID);
-                    if (States.playlistService.getOpenPlaylist() == null) {
+                    PlaylistService.getInstance().openPlaylist(playlistID);
+                    if (PlaylistService.getInstance().getOpenPlaylist() == null) {
                         return this;
                     }
 
+                    AuditService.getInstance().writeAction("User with id " + userID + " has opened playlist with id " + playlistID + ".");
                     return WATCHING_PLAYLIST;
                 }
                 case 4 -> { // Delete a playlist
                     System.out.print("Input playlist id to delete: ");
                     Integer playlistID = States.sc.nextInt();
 
-                    States.playlistService.remove(playlistID);
+                    PlaylistService.getInstance().remove(playlistID);
+                    AuditService.getInstance().writeAction("User with id " + userID + " has removed playlist with id " + playlistID + ".");
                     return this;
                 }
                 case 5 -> { // Go back
-                    States.playlistService.closePlaylist();
+                    PlaylistService.getInstance().closePlaylist();
                     return LOGGED_IN;
                 }
                 case 6 -> { // Exit program
@@ -362,7 +367,7 @@ public enum States {
     WATCHING_PLAYLIST {
         @Override
         int getTask() {
-            Integer playlistID = States.playlistService.getOpenPlaylistID();
+            Integer playlistID = PlaylistService.getInstance().getOpenPlaylistID();
             if (playlistID == null) {
                 System.out.println("There is no playlist open right now.");
                 return 7;
@@ -389,55 +394,61 @@ public enum States {
 
         @Override
         States performTask(int task) {
+            Integer userID = UserService.getInstance().getLoggedUserID();
+            Integer playlistID = PlaylistService.getInstance().getOpenPlaylistID();
+
             switch (task) {
                 case 1 -> { // Show all videos
                     System.out.println("Videos:");
-                    List<Video> videos = States.playlistService.getOpenPlaylist().getVideos();
+                    List<Video> videos = PlaylistService.getInstance().getOpenPlaylist().getVideos();
 
                     for (Video video: videos) {
                         System.out.println(video);
                     }
 
+                    AuditService.getInstance().writeAction("User with id " + userID + " has requested a list of the videos in playlist with id " + playlistID + ".");
                     return this;
                 }
                 case 2 -> { // Switch ordering method
-                    States.playlistService.switchOrdering();
+                    PlaylistService.getInstance().switchOrdering();
 
                     return this;
                 }
                 case 3 -> { // Go to previous video
-                    States.playlistService.previousVideo();
+                    PlaylistService.getInstance().previousVideo();
 
                     return this;
                 }
                 case 4 -> { // Go to next video
-                    States.playlistService.nextVideo();
+                    PlaylistService.getInstance().nextVideo();
 
                     return this;
                 }
                 case 5 -> { // Go to video by id
-                    System.out.print("Input id position of video between 1 and " + States.playlistService.getOpenPlaylist().getVideos().size() + ": ");
+                    System.out.print("Input id position of video between 1 and " + PlaylistService.getInstance().getOpenPlaylist().getVideos().size() + ": ");
                     int position = States.sc.nextInt();
-                    if (position < 1 || position > States.playlistService.getOpenPlaylist().getVideos().size()) {
+                    if (position < 1 || position > PlaylistService.getInstance().getOpenPlaylist().getVideos().size()) {
                         System.out.println("Wrong position index.");
                         return this;
                     }
 
-                    States.playlistService.setVideo(position - 1);
+                    PlaylistService.getInstance().setVideo(position - 1);
                     return this;
                 }
                 case 6 -> { // Remove video from playlist
-                    States.playlistService.removeCurrentVideo();
+                    PlaylistService.getInstance().removeCurrentVideo();
                     return this;
                 }
                 case 7 -> { // Change the name of the playlist
                     System.out.print("Input new name for playlist: ");
                     String newName = States.sc.nextLine();
 
-                    String oldName = States.playlistService.getOpenPlaylist().getName();
-                    States.playlistService.getOpenPlaylist().setName(newName);
-                    if (!States.playlistService.set(States.playlistService.getOpenPlaylist())) {
-                        States.playlistService.getOpenPlaylist().setName(oldName);
+                    String oldName = PlaylistService.getInstance().getOpenPlaylist().getName();
+                    PlaylistService.getInstance().getOpenPlaylist().setName(newName);
+                    if (!PlaylistService.getInstance().set(PlaylistService.getInstance().getOpenPlaylist())) {
+                        PlaylistService.getInstance().getOpenPlaylist().setName(oldName);
+                    } else {
+                        AuditService.getInstance().writeAction("User with id " + userID + " changed the name of playlist with id " + playlistID + ".");
                     }
 
                     return this;
@@ -480,9 +491,10 @@ public enum States {
 
         @Override
         States performTask(int task) {
+            Integer userID = UserService.getInstance().getLoggedUserID();
             switch (task) {
                 case 1 -> { // Show number of subscribers
-                    Integer numberOfSubscribers = States.userService.getNumberOfSubscribers();
+                    Integer numberOfSubscribers = UserService.getInstance().getNumberOfSubscribers();
                     if (numberOfSubscribers != null) {
                         System.out.println("Congrats! You currently have " + numberOfSubscribers + " subscribers!");
                     }
@@ -490,7 +502,7 @@ public enum States {
                     return this;
                 }
                 case 2 -> { // Show users you are subscribed to
-                    List<Person> people = States.userService.getPeopleSubscribedTo();
+                    List<Person> people = UserService.getInstance().getPeopleSubscribedTo();
                     if (people != null) {
                         System.out.println("You are currently subscribed to:");
 
@@ -502,13 +514,14 @@ public enum States {
                     return this;
                 }
                 case 3 -> { // Show your posts
-                    List<Post> posts = States.userService.getOwnPosts();
+                    List<Post> posts = UserService.getInstance().getOwnPosts();
                     if (posts != null) {
                         System.out.println("You currently own the following posts:");
 
                         for (Post post: posts) {
                             System.out.println(post);
                         }
+                        AuditService.getInstance().writeAction("User with id " + userID + " has requested a list of their own posts.");
                     }
 
                     return this;
@@ -518,12 +531,12 @@ public enum States {
                     Integer postID = States.sc.nextInt();
                     States.sc.nextLine();
 
-                    Post post = States.postService.get(postID);
+                    Post post = PostService.getInstance().get(postID);
                     if (post == null) {
                         return this;
                     }
 
-                    if (!Objects.equals(post.getPosterID(), States.userService.getLoggedUserID())) {
+                    if (!Objects.equals(post.getPosterID(), UserService.getInstance().getLoggedUserID())) {
                         System.out.println("This post does not belong to you!");
                         return this;
                     }
@@ -533,8 +546,10 @@ public enum States {
                     String oldName = post.getName();
                     String newName = States.sc.nextLine();
                     post.setName(newName);
-                    if (!States.postService.set(post)) {
+                    if (!PostService.getInstance().set(post)) {
                         post.setName(oldName);
+                    } else {
+                        AuditService.getInstance().writeAction("User with id " + userID + " has modified the name of post with id " + postID + ".");
                     }
 
                     return this;
@@ -544,20 +559,21 @@ public enum States {
                     Integer postID = States.sc.nextInt();
                     States.sc.nextLine();
 
-                    Post post = States.postService.get(postID);
+                    Post post = PostService.getInstance().get(postID);
                     if (post != null) {
-                        if (!Objects.equals(post.getPosterID(), States.userService.getLoggedUserID())) {
+                        if (!Objects.equals(post.getPosterID(), UserService.getInstance().getLoggedUserID())) {
                             System.out.println("This post does not belong to you!");
                             return this;
                         }
 
-                        States.postService.remove(postID);
+                        PostService.getInstance().remove(postID);
+                        AuditService.getInstance().writeAction("User with id " + userID + " has removed post with id " + postID + ".");
                     }
 
                     return this;
                 }
                 case 6 -> { // Show your history
-                    List<Post> history = States.userService.getHistory();
+                    List<Post> history = UserService.getInstance().getHistory();
                     if (history != null) {
                         System.out.println("Post history:");
                         for (Post post: history) {
@@ -568,11 +584,11 @@ public enum States {
                     return this;
                 }
                 case 7 -> { // Change account details
-                    States.userService.updateDetails(States.sc);
+                    UserService.getInstance().updateDetails(States.sc);
                     return this;
                 }
                 case 8 -> { // Delete your account
-                    States.userService.deleteAccount();
+                    UserService.getInstance().deleteAccount();
                     return NOT_LOGGED;
                 }
                 case 9 -> { // Exit profile
@@ -599,10 +615,6 @@ public enum States {
             return this;
         }
     };
-
-    static PostService postService;
-    static UserService userService;
-    static PlaylistService playlistService;
     static Scanner sc;
 
     States() {
@@ -612,9 +624,6 @@ public enum States {
     abstract States performTask(int task);
 
     static {
-        States.postService = PostService.getInstance();
-        States.userService = UserService.getInstance();
-        States.playlistService = PlaylistService.getInstance();
         States.sc = new Scanner(System.in);
     }
 }

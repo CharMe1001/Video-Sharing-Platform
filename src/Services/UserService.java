@@ -54,6 +54,7 @@ public class UserService extends Service<Person> {
 
         try {
             this.add(newPerson);
+            AuditService.getInstance().writeAction("Created new user with id " + newPerson.getID() + ".");
         } catch (Exception e) {
             System.out.println("Error adding new user into database!");
             System.out.println(e.getMessage());
@@ -79,6 +80,7 @@ public class UserService extends Service<Person> {
                 Person person = (Person)BaseEntity.getFromSelect(res);
                 this.logged_user = person;
 
+                AuditService.getInstance().writeAction("User with id " + this.getLoggedUserID() + " has logged in.");
                 System.out.println("Welcome, " + person.getName() + "!");
                 return;
             }
@@ -104,6 +106,7 @@ public class UserService extends Service<Person> {
 
         this.logged_user = null;
         System.out.println("Goodbye, " + person.getName() + "!");
+        AuditService.getInstance().writeAction("User with id " + this.getLoggedUserID() + " has logged out of their account.");
     }
 
     public void deleteAccount() {
@@ -115,6 +118,7 @@ public class UserService extends Service<Person> {
         String name = this.logged_user.getName();
 
         this.remove(this.logged_user.getID());
+        AuditService.getInstance().writeAction("User with id " + this.getLoggedUserID() + " has deleted their account.");
         this.logged_user = null;
         System.out.println("Goodbye forever, " + name + "!");
     }
@@ -153,11 +157,13 @@ public class UserService extends Service<Person> {
                 String sqlDelete = "DELETE FROM SUBSCRIBEDTO WHERE id = " + resultSet.getInt("id");
                 stmt.executeUpdate(sqlDelete);
 
+                AuditService.getInstance().writeAction("User with id " + this.getLoggedUserID() + " has unsubscribed from user with id " + subscribedID + ".");
                 System.out.println("Successfully unsubscribed from user with id = " + subscribedID);
             } else {
                 String sqlInsert = "INSERT INTO SUBSCRIBEDTO(subscriberID, subscribedID) VALUES(" + this.getLoggedUserID() + ", " + subscribedID + ")";
                 stmt.executeUpdate(sqlInsert);
 
+                AuditService.getInstance().writeAction("User with id " + this.getLoggedUserID() + " has subscribed to user with id " + subscribedID + ".");
                 System.out.println("Successfully subscribed to user with id = " + subscribedID);
             }
         } catch (SQLException sqlE) {
@@ -328,17 +334,20 @@ public class UserService extends Service<Person> {
 
         if (this.set(newPerson)) {
             this.logged_user = newPerson;
+            AuditService.getInstance().writeAction("User with id " + this.getLoggedUserID() + " has updated their account details.");
         }
 
         if (!Objects.equals(newPassword, "")) {
             String sqlUpdate = "UPDATE PERSON SET password = " + newPassword + " WHERE id = " + this.getLoggedUserID();
-            Integer rowsUpdated;
+            int rowsUpdated;
 
             try {
                 Statement updateStmt = Service.connection.createStatement();
                 rowsUpdated = updateStmt.executeUpdate(sqlUpdate);
                 if (rowsUpdated == 0) {
                     throw new SQLException("Password of user = " + this.getLoggedUserID() + " has not been updated!");
+                } else {
+                    AuditService.getInstance().writeAction("User with id " + this.getLoggedUserID() + " has updated their password.");
                 }
             } catch (SQLException sqlE) {
                 System.out.println("Error updating password of user with id = " + this.getLoggedUserID() + "!");

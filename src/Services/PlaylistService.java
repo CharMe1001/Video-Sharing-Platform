@@ -90,7 +90,12 @@ public class PlaylistService extends Service<Playlist>{
 
         try {
             Statement insertStmt = Service.connection.createStatement();
-            insertStmt.executeUpdate(sqlInsert);
+            int res = insertStmt.executeUpdate(sqlInsert);
+            if (res == 1) {
+                AuditService.getInstance().writeAction("Video with id " + videoID + " has been added to playlist with id " + playlistID + ".");
+            } else {
+                throw new SQLException("The number of inserted rows is " + res + "!");
+            }
         } catch (SQLException sqlE) {
             System.out.println("Error inserting video with id = " + videoID + " to playlist with id = " + playlistID + "!");
             System.out.println(sqlE.getMessage());
@@ -135,6 +140,7 @@ public class PlaylistService extends Service<Playlist>{
             return null;
         }
 
+        AuditService.getInstance().writeAction("User with id " + ownerID + " requested a list of all of their playlists.");
         return playlists;
     }
 
@@ -143,7 +149,10 @@ public class PlaylistService extends Service<Playlist>{
         playlist.read(sc);
 
         try {
-            super.add(playlist);
+            playlist = super.add(playlist);
+            if (playlist != null) {
+                AuditService.getInstance().writeAction("User with id " + ownerID + " created a new playlist with id " + playlist.getID() + ".");
+            }
         } catch (Exception e) {
             System.out.println("Error adding new playlist to database.");
             System.out.println(e.getMessage());
@@ -189,6 +198,8 @@ public class PlaylistService extends Service<Playlist>{
 
         if (!this.set(this.getOpenPlaylist())) {
             this.getOpenPlaylist().switchOrdering();
+        } else {
+            AuditService.getInstance().writeAction("User with id " + this.getOpenPlaylist().getOwnerID() + " has switched the ordering of playlist with id " + this.getOpenPlaylistID() + ".");
         }
     }
 
@@ -224,7 +235,12 @@ public class PlaylistService extends Service<Playlist>{
 
         try {
             Statement deleteStmt = Service.connection.createStatement();
-            deleteStmt.executeUpdate(sqlDelete);
+            int res = deleteStmt.executeUpdate(sqlDelete);
+            if (res == 1) {
+                AuditService.getInstance().writeAction("User with id " + this.getOpenPlaylist().getOwnerID() + " has removed video with id " + videoID + " from playlist with id " + this.getOpenPlaylistID() + ".");
+            } else {
+                throw new SQLException("The number of removed videos is " + res + "!");
+            }
         } catch (SQLException sqlE) {
             System.out.println("Error removing video with id = " + videoID + " from playlist with id = " + this.getOpenPlaylistID() + "!");
             System.out.println("Delete statement: " + sqlDelete);

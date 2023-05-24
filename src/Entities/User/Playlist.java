@@ -55,6 +55,8 @@ public class Playlist extends BaseEntity {
         return this.name;
     }
 
+    public Integer getOwnerID() {return this.ownerID;}
+
     public void setName(String newName) {
         this.name = newName;
     }

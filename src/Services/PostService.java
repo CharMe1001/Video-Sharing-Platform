@@ -40,7 +40,7 @@ public class PostService extends Service<Post> {
 
         try {
             Statement insertStmt = Service.connection.createStatement();
-            insertStmt.executeQuery(sqlInsert);
+            insertStmt.executeUpdate(sqlInsert);
         } catch (SQLException sqlE) {
             System.out.println("Error inserting user access of post into history!");
             System.out.println(sqlE.getMessage());
@@ -117,51 +117,6 @@ public class PostService extends Service<Post> {
         return posts;
     }
 
-    public List<Post> getAllFromUser(Integer posterID) {
-        String sqlGet = "SELECT * FROM POST WHERE posterID = " + posterID;
-        ResultSet res;
-
-        try {
-            Statement userStmt = Service.connection.createStatement();
-            res = userStmt.executeQuery(sqlGet);
-        } catch (SQLException sqlE) {
-            System.out.println("Error getting all posts belonging to user with id = " + posterID + "!");
-            System.out.println(sqlE.getMessage());
-            return null;
-        }
-
-        List<Post> posts = new ArrayList<>();
-
-        try {
-            while (true) {
-                try {
-                    if (!res.next()) {
-                        break;
-                    }
-                } catch (SQLException sqlE) {
-                    System.out.println("Error retrieving next post belonging to user with id = " + posterID + "!");
-                    throw sqlE;
-                }
-
-                Post post = (Post)BaseEntity.getFromSelect(res);
-
-                if (post instanceof Poll) {
-                    this.getPollOptions((Poll) post);
-                }
-
-                this.selectComments(post);
-
-                posts.add(post);
-            }
-        } catch (Exception e) {
-            System.out.println("Error getting list of posts belonging to user with id = " + posterID + "!");
-            System.out.println(e.getMessage());
-            return null;
-        }
-
-        return posts;
-    }
-
     public int add(Scanner sc, int userID) {
         Post post;
 
@@ -208,6 +163,10 @@ public class PostService extends Service<Post> {
                 Statement stmt = Service.connection.createStatement();
                 stmt.executeUpdate(sqlOptions);
             }
+
+            if (post != null) {
+                AuditService.getInstance().writeAction("User with id " + userID + " has created a new post with id " + post.getID() + ".");
+            }
         } catch (Exception e) {
             System.out.println("Error adding new post to database!");
             System.out.println(e.getMessage());
@@ -246,14 +205,17 @@ public class PostService extends Service<Post> {
                 stmt.executeUpdate(sqlUpdate);
 
                 if (liked == 1) {
+                    AuditService.getInstance().writeAction("User with id " + userID + " has liked post with id " + this.getCurrentPostID() + ".");
                     System.out.println("Successfully liked post with id = " + this.getCurrentPostID() + ".");
                 } else {
+                    AuditService.getInstance().writeAction("User with id " + userID + " has unliked post with id " + this.getCurrentPostID() + ".");
                     System.out.println("Successfully unliked post with id = " + this.getCurrentPostID() + ".");
                 }
             } else {
                 String sqlInsert = "INSERT INTO ENGAGEMENT(userID, postID, liked, disliked) VALUES (" + userID + ", " + this.getCurrentPostID() + ", 1, 0)";
                 stmt.executeUpdate(sqlInsert);
 
+                AuditService.getInstance().writeAction("User with id " + userID + " has liked post with id " + this.getCurrentPostID() + ".");
                 System.out.println("Successfully liked post with id = " + this.getCurrentPostID() + ".");
             }
         } catch (SQLException sqlE) {
@@ -291,14 +253,17 @@ public class PostService extends Service<Post> {
                 stmt.executeUpdate(sqlUpdate);
 
                 if (disliked == 1) {
+                    AuditService.getInstance().writeAction("User with id " + userID + " has disliked post with id " + this.getCurrentPostID() + ".");
                     System.out.println("Successfully disliked post with id = " + this.getCurrentPostID() + ".");
                 } else {
+                    AuditService.getInstance().writeAction("User with id " + userID + " has undisliked post with id " + this.getCurrentPostID() + ".");
                     System.out.println("Successfully undisliked post with id = " + this.getCurrentPostID() + ".");
                 }
             } else {
                 String sqlInsert = "INSERT INTO ENGAGEMENT(userID, postID, liked, disliked) VALUES (" + userID + ", " + this.getCurrentPostID() + ", 0, 1)";
                 stmt.executeUpdate(sqlInsert);
 
+                AuditService.getInstance().writeAction("User with id " + userID + " has disliked post with id " + this.getCurrentPostID() + ".");
                 System.out.println("Successfully disliked post with id = " + this.getCurrentPostID() + ".");
             }
         } catch (SQLException sqlE) {
@@ -341,6 +306,7 @@ public class PostService extends Service<Post> {
         this.insertComment(comment);
         this.getCurrentPost().putInCommentTree(comment.getID());
 
+        AuditService.getInstance().writeAction("User with id " + userID + " added a comment to post with id " + this.getCurrentPostID() + ".");
         System.out.println("Successfully commented on post with id = " + this.getCurrentPostID() + ".");
     }
 
@@ -356,6 +322,7 @@ public class PostService extends Service<Post> {
         this.insertComment(comment);
         this.getCurrentPost().putInCommentTree(comment.getID());
 
+        AuditService.getInstance().writeAction("User with id " + userID + " replied to comment with id " + parentID + " on post with id " + this.getCurrentPostID() + ".");
         System.out.println("Successfully replied to comment with id = " + comment.getParentID() + ".");
 
     }
