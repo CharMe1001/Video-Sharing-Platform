@@ -14,8 +14,12 @@ Components:
 - Playlist (a collection of videos a user can create)
 
 Actions:
+
 The project is split into several menus a user can interact with:
 1. NOT_LOGGED: this is the menu that appears when a user is not logged in yet; here, they can either register a new account or log in an existing one.
-2. LOGGED_INT: this represents the "Main page" of the platform after the user logs in; from here they can view their data(stats, history, etc.), they can create/open/delete a post/playlist, or they can log out of their account.
-3. WATCHING_POST: this represents a page where a post is open; here, a user can like/dislike the post, subscribe to the poster, leave a comment or reply, add the post to an existing playlist, delete the post(if they created it), or they can close the post, going back to the main page.
-4. WATCHING_PLAYLIST: this represents a page where a playlist is open(TO BE IMPLEMENTED); here, a user can interact normally with the currently playing video in the playlist, while being able to reach another video in a sequential or random order. They can also delete the playlist or remove a video from it.
+2. LOGGED_IN: this represents the "Main page" of the platform after the user logs in; from here they can access different menus, or they can log out of their account.
+3. POST_MENU: this is a menu that provides basic post functionality; showing, creating and opening posts.
+4. WATCHING_POST: this represents a page where a post is open; here, a user can like/dislike the post, subscribe to the poster, leave a comment or reply, add the post to an existing playlist, or they can close the post, going back to the main page.
+5. PLAYLIST_MENU: this is a menu that provides basic playlist functionality; showing, creating, opening and deleting one of your playlists.
+6. WATCHING_PLAYLIST: this represents a page where a playlist is open; here, a user can traverse its videos in a sequential or random order, they can remove a video, or change the playlists name.
+7. PROFILE: this represents the user profile; here, a user can access info about their subscribers/people they are subscribed to, they can modify their posts, they can access their post history, or they can update their account data or outright delete it.
