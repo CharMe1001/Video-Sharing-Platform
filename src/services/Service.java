@@ -1,8 +1,7 @@
-package Services;
+package services;
 
-import Entities.BaseEntity;
+import entities.BaseEntity;
 
-import javax.swing.plaf.nimbus.State;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 
@@ -17,6 +16,12 @@ public abstract class Service<T extends BaseEntity> {
     }
 
     static public Connection connection;
+
+    static public void setupConnection(String database) throws ClassNotFoundException, SQLException {
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+        Service.connection = DriverManager.getConnection("jdbc:sqlserver://localhost;database=" + database + ";encrypt=false;integratedSecurity=true");
+    }
 
     public T add(T item) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         String insertQuery = item.toSQLInsert(this.getGenericName());

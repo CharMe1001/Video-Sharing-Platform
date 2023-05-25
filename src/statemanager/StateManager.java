@@ -1,7 +1,4 @@
-package StateManager;
-
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
+package statemanager;
 
 public class StateManager {
     private static StateManager stateManager = null;

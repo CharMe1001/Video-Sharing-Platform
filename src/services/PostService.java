@@ -1,17 +1,13 @@
-package Services;
+package services;
 
-import Entities.BaseEntity;
-import Entities.Post.*;
-import Entities.Post.Short;
-import Entities.User.UserComment;
+import entities.Post.*;
+import entities.Post.Short;
+import entities.User.UserComment;
 
-import javax.swing.plaf.nimbus.State;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 

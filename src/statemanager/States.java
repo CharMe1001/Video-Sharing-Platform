@@ -1,11 +1,11 @@
-package StateManager;
+package statemanager;
 
-import Entities.Post.Post;
-import Entities.Post.Video;
-import Entities.User.Playlist;
-import Entities.User.UserComment;
-import Services.*;
-import Entities.User.Person;
+import entities.Post.Post;
+import entities.Post.Video;
+import entities.User.Playlist;
+import entities.User.UserComment;
+import services.*;
+import entities.User.Person;
 
 import java.util.*;
 

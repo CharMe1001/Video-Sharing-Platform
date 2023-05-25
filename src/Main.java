@@ -1,18 +1,16 @@
-import Services.JDBCUtils;
-import StateManager.StateManager;
+import services.JDBCUtils;
+import statemanager.StateManager;
 
 import java.sql.*;
-import Services.Service;
+import services.Service;
 
 public class Main {
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        Service.setupConnection("VSP");
 
-        Service.connection = DriverManager.getConnection("jdbc:sqlserver://localhost;database=VSP;encrypt=false;integratedSecurity=true");
-
-        //JDBCUtils.connection = Service.connection;
-        //JDBCUtils.DropEverything();
-        //JDBCUtils.CreateTables();
+        JDBCUtils.getConnection(Service.connection);
+        JDBCUtils.dropEverything();
+        JDBCUtils.createTables();
 
         StateManager manager = StateManager.getInstance();
 

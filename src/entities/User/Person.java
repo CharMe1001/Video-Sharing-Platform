@@ -1,6 +1,6 @@
-package Entities.User;
+package entities.User;
 
-import Entities.BaseEntity;
+import entities.BaseEntity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,8 +1,8 @@
-package Services;
+package services;
 
-import Entities.BaseEntity;
-import Entities.Post.Post;
-import Entities.User.Person;
+import entities.BaseEntity;
+import entities.Post.Post;
+import entities.User.Person;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

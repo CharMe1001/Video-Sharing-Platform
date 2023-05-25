@@ -1,4 +1,4 @@
-package Entities.Post;
+package entities.Post;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

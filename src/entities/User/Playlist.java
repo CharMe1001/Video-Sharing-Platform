@@ -1,7 +1,7 @@
-package Entities.User;
+package entities.User;
 
-import Entities.BaseEntity;
-import Entities.Post.Video;
+import entities.BaseEntity;
+import entities.Post.Video;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;

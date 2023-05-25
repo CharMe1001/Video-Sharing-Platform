@@ -7,6 +7,26 @@
     <list default="true" id="61dfc136-7d83-4f99-8ee4-645679704a94" name="Changes" comment="Completed all services besides playlist functionality.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entities/BaseEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/BaseEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entities/Post/Ad.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Post/Ad.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entities/Post/CommunityPost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Post/CommunityPost.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entities/Post/Poll.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Post/Poll.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entities/Post/Post.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Post/Post.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entities/Post/Short.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Post/Short.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entities/Post/UserPost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Post/UserPost.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entities/Post/Video.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Post/Video.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entities/User/Person.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/User/Person.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entities/User/Playlist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/User/Playlist.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entities/User/UserComment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/User/UserComment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Services/AuditService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/AuditService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Services/JDBCUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/JDBCUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Services/PlaylistService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/PlaylistService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Services/PostService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/PostService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Services/Service.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/Service.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/StateManager/StateManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/statemanager/StateManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/StateManager/States.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/statemanager/States.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,7 +46,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/src/Entities/User/Person.java" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/entities/User/Person.java" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -101,7 +121,7 @@
       <workItem from="1684066149485" duration="16667000" />
       <workItem from="1684136210713" duration="21721000" />
       <workItem from="1684588645016" duration="7970000" />
-      <workItem from="1684930087412" duration="7775000" />
+      <workItem from="1684930087412" duration="9890000" />
     </task>
     <task id="LOCAL-00001" summary="Start">
       <created>1680723633193</created>
@@ -164,7 +184,7 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/StateManager/States.java</url>
+          <url>file://$PROJECT_DIR$/src/statemanager/States.java</url>
           <line>149</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>

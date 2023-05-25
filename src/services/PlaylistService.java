@@ -1,7 +1,7 @@
-package Services;
+package services;
 
-import Entities.BaseEntity;
-import Entities.User.Playlist;
+import entities.BaseEntity;
+import entities.User.Playlist;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,13 +1,17 @@
-package Services;
+package services;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public class JDBCUtils {
-    public static Connection connection;
+    private static Connection connection;
 
-    public static void CreateTables() throws SQLException {
+    public static void getConnection(Connection connection) {
+        JDBCUtils.connection = connection;
+    }
+
+    public static void createTables() throws SQLException {
         Statement stmt = JDBCUtils.connection.createStatement();
 
         String sqlCreateUser = "CREATE TABLE PERSON(" +
@@ -146,7 +150,7 @@ public class JDBCUtils {
         stmt.executeUpdate(sqlCreatePersonTrigger);
     }
 
-    public static void DropEverything() throws SQLException {
+    public static void dropEverything() throws SQLException {
         Statement stmt = JDBCUtils.connection.createStatement();
 
         String sqlDropPersonTrigger = "DROP TRIGGER IF EXISTS PERSON_DELETE";

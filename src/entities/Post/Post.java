@@ -1,7 +1,7 @@
-package Entities.Post;
+package entities.Post;
 
-import Entities.BaseEntity;
-import Entities.User.UserComment;
+import entities.BaseEntity;
+import entities.User.UserComment;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;

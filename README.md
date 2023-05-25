@@ -1,7 +1,14 @@
 # Video-Sharing-Platform
 Java project that manages data regarding a video sharing platform.
 
-Components:
+In order to establish a database connection provide the name of an existing MSSqlServer database to the Service.setupConnection function.
+
+The project provides a service called JDBCUtils with several static functions:
+- The getConnection function gets a Connection object and assigns it as the JDBCUtils database connection;
+- The dropEverything function clears the database;
+- The createTables function creates the necessary tables for the project to function.
+
+### Components:
 - Post (any kind of post that a user might interact with)
   - Ad (a paid ad that promoted some kind of product; a user will not be attached to it, however it has a lifetime after which it will be deleted)
   - UserPost (a post that is visibly attached to a user)
@@ -13,7 +20,7 @@ Components:
 - Comment (a comment that a user can leave on a UserPost)
 - Playlist (a collection of videos a user can create)
 
-Actions:
+### Actions:
 
 The project is split into several menus a user can interact with:
 1. NOT_LOGGED: this is the menu that appears when a user is not logged in yet; here, they can either register a new account or log in an existing one.
