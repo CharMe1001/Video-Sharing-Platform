@@ -4,7 +4,7 @@ Java project that manages data regarding a video sharing platform.
 In order to establish a database connection provide the name of an existing MSSqlServer database to the Service.setupConnection function.
 
 The project provides a service called JDBCUtils with several static functions:
-- The getConnection function gets a Connection object and assigns it as the JDBCUtils database connection;
+- The setConnection function gets a Connection object and assigns it as the JDBCUtils database connection;
 - The dropEverything function clears the database;
 - The createTables function creates the necessary tables for the project to function.
 

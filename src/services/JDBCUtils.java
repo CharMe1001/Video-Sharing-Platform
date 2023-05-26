@@ -5,12 +5,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class JDBCUtils {
+    // The connection to the MSSQLServer database.
     private static Connection connection;
 
-    public static void getConnection(Connection connection) {
+    // Sets the connection to the database.
+    public static void setConnection(Connection connection) {
         JDBCUtils.connection = connection;
     }
 
+    // Creates the necessary tables for the program to function properly.
     public static void createTables() throws SQLException {
         Statement stmt = JDBCUtils.connection.createStatement();
 
@@ -143,13 +146,14 @@ public class JDBCUtils {
                 "DELETE FROM PLAYLIST WHERE ownerID IN (SELECT id FROM DELETED) " +
                 "DELETE FROM SUBSCRIBEDTO WHERE subscribedID IN (SELECT id FROM DELETED) " +
                 "DELETE FROM SUBSCRIBEDTO WHERE subscriberID IN (SELECT id FROM DELETED) " +
-                "DELETE FROM ENAGAGEMENT WHERE userID IN (SELECT id FROM DELETED) " +
+                "DELETE FROM ENGAGEMENT WHERE userID IN (SELECT id FROM DELETED) " +
                 "DELETE FROM HISTORY WHERE userID IN (SELECT id FROM DELETED) " +
                 "DELETE FROM PERSON WHERE id IN (SELECT id FROM DELETED) " +
                 "END;";
         stmt.executeUpdate(sqlCreatePersonTrigger);
     }
 
+    // Drops all tables from the database.
     public static void dropEverything() throws SQLException {
         Statement stmt = JDBCUtils.connection.createStatement();
 

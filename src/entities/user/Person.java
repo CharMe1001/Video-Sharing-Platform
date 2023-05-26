@@ -1,4 +1,4 @@
-package entities.User;
+package entities.user;
 
 import entities.BaseEntity;
 
@@ -7,8 +7,13 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class Person extends BaseEntity {
+    // The name of the user.
     private String name;
+
+    // The password of the user.
     private String password;
+
+    // The email address of the user.
     private String email;
 
     public Person() {
@@ -23,6 +28,7 @@ public class Person extends BaseEntity {
         this.email = email;
     }
 
+    // Reads the data of the user using the scanner.
     public void read(Scanner sc) {
         System.out.print("Input user name: ");
         this.name = sc.next();
@@ -34,6 +40,7 @@ public class Person extends BaseEntity {
         this.email = sc.next();
     }
 
+    @Override
     public String toString() {
         String ret = "";
 
@@ -43,6 +50,7 @@ public class Person extends BaseEntity {
         return ret;
     }
 
+    @Override
     public boolean equals(Object object) {
         if (!(object instanceof Person person)) {
             return false;
@@ -51,24 +59,30 @@ public class Person extends BaseEntity {
         return (this.email.equals(person.email) && this.password.equals(person.password));
     }
 
+    // Returns the name of the user.
     public String getName() {
         return this.name;
     }
 
+    // Returns the email address of the user.
     public String getEmail() {return this.email;}
 
+    @Override
     public String getColumns() {
         return super.getColumns() + "name, password, email";
     }
 
+    @Override
     public String toSQLInsert(String className) {
         return super.toSQLInsert(className) + "'" + this.name + "', '" + this.password + "', '" + this.email + "')";
     }
 
+    @Override
     public String getSQLUpdate(String className) {
         return super.getSQLUpdate(className) + "name = '" + this.name + "', email = '" + this.email + "'";
     }
 
+    @Override
     protected void getDataFromSelect(ResultSet src) throws SQLException {
         super.getDataFromSelect(src);
 

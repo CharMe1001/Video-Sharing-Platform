@@ -1,4 +1,4 @@
-package entities.Post;
+package entities.post;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -6,7 +6,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Poll extends UserPost {
+    // The text content of the poll.
     private String text;
+
+    // The list of options of the poll.
     private List<String> options;
 
     public Poll() {
@@ -47,6 +50,7 @@ public class Poll extends UserPost {
         }
     }
 
+    @Override
     public String toString() {
         StringBuilder ret = new StringBuilder(super.toString());
         ret.append("Content: ").append(this.text).append("\n");
@@ -58,24 +62,27 @@ public class Poll extends UserPost {
         return ret.toString();
     }
 
+    @Override
     public String getColumns() {
         return super.getColumns() + ", text";
     }
 
+    // Returns the SQL Insert statement for the options of the poll.
     public String toSQLInsertOptions() {
         return "INSERT INTO OPTIONS(text, pollID) VALUES" + this.options.stream().<String>map(option -> "('" + option + "', " + this.id + ")").collect(Collectors.joining(", "));
     }
 
+    @Override
     public String toSQLInsert(String className) {
         return super.toSQLInsert(className) + ", '" + this.text + "')";
     }
 
+    @Override
     public String getSQLUpdate(String className) {
-
-
         return super.getSQLUpdate(className) + ", text = '" + this.text + "', options = OPT_TAB(" + this.options.stream().<String>map(option -> "'" + option + "'").collect(Collectors.joining(", ")) + ")";
     }
 
+    @Override
     protected void getDataFromSelect(ResultSet src) throws SQLException {
         super.getDataFromSelect(src);
 
@@ -87,6 +94,7 @@ public class Poll extends UserPost {
         }
     }
 
+    // Gets the list of options of the poll from a ResultSet object.
     public void getOptionsFromResult(ResultSet options) throws SQLException {
         while (true) {
             try {

@@ -10,25 +10,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Service<T extends BaseEntity> {
+    // Returns the generic name of the T class.
     protected String getGenericName() {
         String[] name = ((Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]).getTypeName().split("\\.", 0);
         return name[name.length - 1].toUpperCase();
     }
 
-    static public Connection connection;
+    // The connection to the MSSQLServer database.
+    static private Connection connection;
 
+    // Returns the database connection.
+    static public Connection getConnection() {
+        return Service.connection;
+    }
+
+    // Sets up the database connection.
     static public void setupConnection(String database) throws ClassNotFoundException, SQLException {
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
         Service.connection = DriverManager.getConnection("jdbc:sqlserver://localhost;database=" + database + ";encrypt=false;integratedSecurity=true");
     }
 
+    // Inserts the given item into the database.
     public T add(T item) throws SQLException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         String insertQuery = item.toSQLInsert(this.getGenericName());
         PreparedStatement insertStmt;
 
         try {
-            insertStmt = Service.connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
+            insertStmt = Service.getConnection().prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
             insertStmt.executeUpdate();
         } catch (SQLException sqlE) {
             System.out.println("Error adding new " + this.getGenericName() + "!");
@@ -42,7 +51,7 @@ public abstract class Service<T extends BaseEntity> {
         try (ResultSet resID = insertStmt.getGeneratedKeys()) {
             if (resID.next()) {
                 String getItemQuery = "SELECT * FROM " + this.getGenericName() + " WHERE id = " + resID.getInt(1);
-                Statement getStmt = Service.connection.createStatement();
+                Statement getStmt = Service.getConnection().createStatement();
 
                 ResultSet resItem = getStmt.executeQuery(getItemQuery);
                 if (resItem.next()) {
@@ -61,12 +70,13 @@ public abstract class Service<T extends BaseEntity> {
         }
     }
 
+    // Removes the item with the given id from the database.
     public void remove(Integer id) {
         String deleteQuery = "DELETE FROM " + this.getGenericName() + " WHERE id = " + id;
         int cntDeleted;
 
         try {
-            Statement deleteStmt = Service.connection.createStatement();
+            Statement deleteStmt = Service.getConnection().createStatement();
             cntDeleted = deleteStmt.executeUpdate(deleteQuery);
         } catch (SQLException sqlE) {
             System.out.println("Error removing " + this.getGenericName() + " from the database!");
@@ -83,12 +93,13 @@ public abstract class Service<T extends BaseEntity> {
         }
     }
 
+    // Updates the data of the given item into the database.
     public boolean set(T item) {
         String updateQuery = item.getSQLUpdate(this.getGenericName()) + " WHERE id = " + item.getID();
         int cntUpdated;
 
         try {
-            Statement updateStmt = Service.connection.createStatement();
+            Statement updateStmt = Service.getConnection().createStatement();
             cntUpdated = updateStmt.executeUpdate(updateQuery);
         }  catch (SQLException sqlE) {
             System.out.println("Error updating " + this.getGenericName() + " in database!");
@@ -109,12 +120,13 @@ public abstract class Service<T extends BaseEntity> {
         return true;
     }
 
+    // Gets the data of the item with the given id from the database.
     public T get(Integer id) {
         String getQuery = "SELECT * FROM " + this.getGenericName() + " WHERE id = " + id;
         ResultSet res;
 
         try {
-            Statement getStmt = Service.connection.createStatement();
+            Statement getStmt = Service.getConnection().createStatement();
             res = getStmt.executeQuery(getQuery);
         } catch (SQLException sqlE) {
             System.out.println("Error retrieving " + this.getGenericName() + " with id = " + id + "!");
@@ -136,12 +148,13 @@ public abstract class Service<T extends BaseEntity> {
         }
     }
 
+    // Gets all items from the database.
     public List<T> getAll() {
         String getQuery = "SELECT * FROM " + this.getGenericName();
         ResultSet res;
 
         try {
-            Statement getStmt = Service.connection.createStatement();
+            Statement getStmt = Service.getConnection().createStatement();
             res = getStmt.executeQuery(getQuery);
         } catch (SQLException sqlE) {
             System.out.println("Error retrieving all objects of type " + this.getGenericName() + "!");

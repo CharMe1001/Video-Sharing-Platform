@@ -1,15 +1,16 @@
 package statemanager;
 
-import entities.Post.Post;
-import entities.Post.Video;
-import entities.User.Playlist;
-import entities.User.UserComment;
+import entities.post.Post;
+import entities.post.Video;
+import entities.user.Playlist;
+import entities.user.UserComment;
 import services.*;
-import entities.User.Person;
+import entities.user.Person;
 
 import java.util.*;
 
 public enum States {
+    // The state for when no user is logged-in yet.
     NOT_LOGGED {
         @Override
         int getTask() {
@@ -56,6 +57,7 @@ public enum States {
             }
         }
     },
+    // The hub of menus that a logged-in user can access.
     LOGGED_IN {
         @Override
         int getTask() {
@@ -106,6 +108,7 @@ public enum States {
             }
         }
     },
+    // The menu where a user can navigate through posts.
     POST_MENU {
         @Override
         int getTask() {
@@ -170,6 +173,7 @@ public enum States {
             }
         }
     },
+    // A menu where a user can interact with an opened post.
     WATCHING_POST {
         @Override
         int getTask() {
@@ -292,6 +296,7 @@ public enum States {
             }
         }
     },
+    // A menu where a user can navigate through their own playlists.
     PLAYLIST_MENU {
         @Override
         int getTask() {
@@ -364,13 +369,14 @@ public enum States {
             }
         }
     },
+    // A menu where a user can interact with an opened playlist.
     WATCHING_PLAYLIST {
         @Override
         int getTask() {
             Integer playlistID = PlaylistService.getInstance().getOpenPlaylistID();
             if (playlistID == null) {
                 System.out.println("There is no playlist open right now.");
-                return 7;
+                return 8;
             }
 
             int task;
@@ -466,6 +472,7 @@ public enum States {
             }
         }
     },
+    // A menu where a user can manager their own information.
     PROFILE {
         @Override
         int getTask() {
@@ -615,14 +622,20 @@ public enum States {
             return this;
         }
     };
+
+    // Scanner for reading data.
     static Scanner sc;
 
     States() {
     }
 
+    // Returns the task requested by the user.
     abstract int getTask();
+
+    // Returns the state of the program after completing the given task.
     abstract States performTask(int task);
 
+    // Initializes the scanner.
     static {
         States.sc = new Scanner(System.in);
     }

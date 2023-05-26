@@ -1,10 +1,11 @@
-package entities.Post;
+package entities.post;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
 public class CommunityPost extends UserPost {
+    // The text content of the community post.
     private String text;
 
     public CommunityPost() {
@@ -30,6 +31,7 @@ public class CommunityPost extends UserPost {
         this.text = sc.nextLine();
     }
 
+    @Override
     public String toString() {
         String ret = super.toString();
         ret += ("Content: " + this.text + "\n");
@@ -37,18 +39,22 @@ public class CommunityPost extends UserPost {
         return ret;
     }
 
+    @Override
     public String getColumns() {
         return super.getColumns() + ", text";
     }
 
+    @Override
     public String toSQLInsert(String className) {
         return super.toSQLInsert(className) + ", '" + this.text + "')";
     }
 
+    @Override
     public String getSQLUpdate(String className) {
         return super.getSQLUpdate(className) + ", text = '" + this.text + "'";
     }
 
+    @Override
     protected void getDataFromSelect(ResultSet src) throws SQLException {
         super.getDataFromSelect(src);
 

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class AuditService {
-    private FileWriter fw;
+    // An object that is used to write into csv files.
     private CSVWriter writer;
     private static AuditService instance = null;
 
@@ -22,23 +22,26 @@ public class AuditService {
     }
 
 
-
+    // If the audit file exists already, open it with the append flag; otherwise, create it and write the header.
     private AuditService() {
         boolean needToAddHeader = !(new File("audit.csv").isFile());
         try {
-            this.fw = new FileWriter("audit.csv", !needToAddHeader);
-            this.writer = new CSVWriter(this.fw);
+            FileWriter fileWriter = new FileWriter("audit.csv", !needToAddHeader);
+            this.writer = new CSVWriter(fileWriter);
 
             if (needToAddHeader) {
                 String[] header = {"action", "timestamp"};
                 this.writer.writeNext(header);
             }
+
+            this.writer.flush();
         } catch (IOException e) {
             System.out.println("Error opening audit file.");
             System.out.println(e.getMessage());
         }
     }
 
+    // Writes the given string with the writer and automatically flushes it.
     public void writeAction(String action) {
         String[] entry = new String[]{action, DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(LocalDateTime.now())};
         try {

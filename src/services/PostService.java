@@ -1,8 +1,8 @@
 package services;
 
-import entities.Post.*;
-import entities.Post.Short;
-import entities.User.UserComment;
+import entities.post.*;
+import entities.post.Short;
+import entities.user.UserComment;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,21 +21,24 @@ public class PostService extends Service<Post> {
         return PostService.instance;
     }
 
+    // The currently open post.
     private Post openPost;
 
     private PostService() {
         this.openPost = null;
     }
 
+    // Opens the post with the given id.
     public void openPost(Integer id) {
         this.openPost = this.get(id);
     }
 
+    // Adds the currently open post to the view history of the given user.
     public void addToHistory(Integer userID) {
         String sqlInsert = "INSERT INTO HISTORY(userID, postID) VALUES(" + userID + ", " + this.getCurrentPostID() + ")";
 
         try {
-            Statement insertStmt = Service.connection.createStatement();
+            Statement insertStmt = Service.getConnection().createStatement();
             insertStmt.executeUpdate(sqlInsert);
         } catch (SQLException sqlE) {
             System.out.println("Error inserting user access of post into history!");
@@ -43,24 +46,28 @@ public class PostService extends Service<Post> {
         }
     }
 
+    // Closes the currently open post.
     public void closePost() {
         this.openPost = null;
     }
 
-    public Integer getCurrentPostID() {
-        return this.openPost == null ? null : this.openPost.getID();
-    }
-
+    // Returns the currently open post.
     public Post getCurrentPost() {
         return this.openPost;
     }
 
+    // Returns the id of the currently open post.
+    public Integer getCurrentPostID() {
+        return this.openPost == null ? null : this.openPost.getID();
+    }
+
+    // Gets the polls options from the database.
     private void getPollOptions(Poll poll) {
         String getOptions = "SELECT * FROM OPTIONS WHERE pollID = " + poll.getID();
         ResultSet options;
 
         try {
-            Statement stmt = Service.connection.createStatement();
+            Statement stmt = Service.getConnection().createStatement();
             options = stmt.executeQuery(getOptions);
 
             poll.getOptionsFromResult(options);
@@ -70,12 +77,13 @@ public class PostService extends Service<Post> {
         }
     }
 
+    // Gets the posts comments from the database.
     private void selectComments(Post post) {
         String getComments = "SELECT * FROM USERCOMMENT WHERE postID = " + post.getID();
         ResultSet comments;
 
         try {
-            Statement stmt = Service.connection.createStatement();
+            Statement stmt = Service.getConnection().createStatement();
             comments = stmt.executeQuery(getComments);
 
             post.getCommentsFromSelect(comments);
@@ -86,6 +94,7 @@ public class PostService extends Service<Post> {
 
     }
 
+    @Override
     public Post get(Integer id) {
         Post post = super.get(id);
         if (post == null) {
@@ -100,6 +109,7 @@ public class PostService extends Service<Post> {
         return post;
     }
 
+    @Override
     public List<Post> getAll() {
         List<Post> posts = super.getAll();
         for (Post post: posts) {
@@ -113,12 +123,13 @@ public class PostService extends Service<Post> {
         return posts;
     }
 
+    // Inserts the newly read post into the database.
     public int add(Scanner sc, int userID) {
         Post post;
 
         int type;
         while (true) {
-            System.out.print("Input type of post (1 - Ad, 2 - Poll, 3 - Post, 4 - Short, 5 - Video): ");
+            System.out.print("Input type of post (1 - Ad, 2 - Poll, 3 - Community Post, 4 - Short, 5 - Video): ");
             type = sc.nextInt();
             sc.nextLine();
 
@@ -156,7 +167,7 @@ public class PostService extends Service<Post> {
             if (post instanceof Poll) {
                 String sqlOptions = ((Poll) post).toSQLInsertOptions();
 
-                Statement stmt = Service.connection.createStatement();
+                Statement stmt = Service.getConnection().createStatement();
                 stmt.executeUpdate(sqlOptions);
             }
 
@@ -172,13 +183,14 @@ public class PostService extends Service<Post> {
         return 0;
     }
 
+    // Likes the currently open post.
     public void like(Integer userID) {
         Statement stmt;
         ResultSet resultSet;
         String sqlGet = "SELECT liked, disliked FROM ENGAGEMENT WHERE userID = " + userID + " AND postID = " + this.getCurrentPostID();
 
         try {
-            stmt = Service.connection.createStatement();
+            stmt = Service.getConnection().createStatement();
             resultSet = stmt.executeQuery(sqlGet);
         } catch (SQLException sqlE) {
             System.out.println("Error getting like/dislike data for user with id = " + userID + " on post with id = " + this.getCurrentPostID() + "!");
@@ -220,13 +232,14 @@ public class PostService extends Service<Post> {
         }
     }
 
+    // Dislikes the currently open post.
     public void dislike(Integer userID) {
         String sqlGet = "SELECT liked, disliked FROM ENGAGEMENT WHERE userID = " + userID + " AND postID = " + this.getCurrentPostID();
         Statement stmt;
         ResultSet resultSet;
 
         try {
-            stmt = Service.connection.createStatement();
+            stmt = Service.getConnection().createStatement();
             resultSet = stmt.executeQuery(sqlGet);
         } catch (SQLException sqlE) {
             System.out.println("Error getting like/dislike data for user with id = " + userID + " on post with id = " + this.getCurrentPostID() + "!");
@@ -265,16 +278,16 @@ public class PostService extends Service<Post> {
         } catch (SQLException sqlE) {
             System.out.println("Error getting like/dislike data for user with id = " + userID + " on post with id = " + this.getCurrentPostID() + "!");
             System.out.println(sqlE.getMessage());
-            return;
         }
     }
 
+    // Inserts the given comment into the database.
     private void insertComment(UserComment comment) {
         String sqlInsert = comment.toSQLInsert(comment.getClass().getSimpleName().toUpperCase());
         PreparedStatement commentStmt;
 
         try {
-            commentStmt = Service.connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+            commentStmt = Service.getConnection().prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
             commentStmt.executeUpdate();
         } catch (SQLException sqlE) {
             System.out.println("Error adding comment to database!");
@@ -294,6 +307,7 @@ public class PostService extends Service<Post> {
 
     }
 
+    // Adds the newly read comment to the database.
     public void addComment(Scanner sc, Integer userID) {
         UserComment comment = new UserComment(userID, this.getCurrentPostID());
         comment.read(sc);
@@ -306,6 +320,7 @@ public class PostService extends Service<Post> {
         System.out.println("Successfully commented on post with id = " + this.getCurrentPostID() + ".");
     }
 
+    // Adds the newly read reply to the database.
     public void addComment(Scanner sc, Integer userID, Integer parentID) {
         UserComment comment = new UserComment(userID, this.getCurrentPostID(), parentID);
         comment.read(sc);

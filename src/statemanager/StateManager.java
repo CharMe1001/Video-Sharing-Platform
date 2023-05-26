@@ -3,6 +3,7 @@ package statemanager;
 public class StateManager {
     private static StateManager stateManager = null;
 
+    // The current state of the program.
     private States state;
 
     private StateManager() {
@@ -17,6 +18,7 @@ public class StateManager {
         return stateManager;
     }
 
+    // The main program loop.
     public void loop() {
         while (true) {
             if (this.state == States.EXITED) {

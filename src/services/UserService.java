@@ -1,8 +1,9 @@
 package services;
 
 import entities.BaseEntity;
-import entities.Post.Post;
-import entities.User.Person;
+import entities.post.Post;
+import entities.user.Person;
+import exceptions.UserAlreadyExistsException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,32 +23,43 @@ public class UserService extends Service<Person> {
         return UserService.instance;
     }
 
+    // The currently logged-in user.
     private Person logged_user;
 
     private UserService() {
         this.logged_user = null;
     }
 
+    // Returns the currently logged-in user.
+    private Person getLoggedUser() {
+        return this.logged_user;
+    }
+
+    // Returns the id of the currently logged-in user.
     public Integer getLoggedUserID() {
         return this.logged_user == null ? null : this.logged_user.getID();
     }
 
+    // Inserts the given user into the database.
     public void register(Person newPerson) {
         String sqlCheck = "SELECT DISTINCT 1 FROM PERSON WHERE email = '" + newPerson.getEmail() + "'";
         ResultSet res;
 
         try {
-            Statement stmt = Service.connection.createStatement();
+            Statement stmt = Service.getConnection().createStatement();
             res = stmt.executeQuery(sqlCheck);
 
             if (res.next()) {
-                System.out.println("User with this email already exists.");
-                return;
+                throw new UserAlreadyExistsException("User with this email already exists.");
             }
         } catch (SQLException sqlE) {
             System.out.println("Error checking if user already exists!");
             System.out.println("Select statement: " + sqlCheck);
             System.out.println(sqlE.getMessage());
+
+            return;
+        } catch (UserAlreadyExistsException runE) {
+            System.out.println(runE.getMessage());
 
             return;
         }
@@ -62,12 +74,13 @@ public class UserService extends Service<Person> {
 
     }
 
+    // Logs the user with the given credentials in.
     public void login(String email, String password) {
         String sqlLogin = "SELECT * FROM PERSON WHERE email = '" + email + "' AND password = '" + password + "'";
         ResultSet res;
 
         try {
-            Statement stmt = Service.connection.createStatement();
+            Statement stmt = Service.getConnection().createStatement();
             res = stmt.executeQuery(sqlLogin);
         } catch (SQLException sqlE) {
             System.out.println("Error retrieving user details from database!");
@@ -92,12 +105,9 @@ public class UserService extends Service<Person> {
         System.out.println("There is no user with these credentials.");
     }
 
-    private Person getCurrentUser() {
-        return this.logged_user;
-    }
-
+    // Logs the current user out.
     public void logout() {
-        Person person = this.getCurrentUser();
+        Person person = this.getLoggedUser();
 
         if (person == null) {
             System.out.println("No user is logged in.");
@@ -109,6 +119,7 @@ public class UserService extends Service<Person> {
         AuditService.getInstance().writeAction("User with id " + this.getLoggedUserID() + " has logged out of their account.");
     }
 
+    // Deletes the account of the currently logged-in user.
     public void deleteAccount() {
         if (this.logged_user == null) {
             System.out.println("No user is logged in.");
@@ -123,6 +134,7 @@ public class UserService extends Service<Person> {
         System.out.println("Goodbye forever, " + name + "!");
     }
 
+    // Subscribes the currently logged-in user to the user with the given id.
     public void subscribeTo(Integer subscribedID) {
         if (Objects.equals(subscribedID, this.getLoggedUserID())) {
             System.out.println("You cannot subscribe to yourself!");
@@ -132,7 +144,7 @@ public class UserService extends Service<Person> {
         Statement stmt;
 
         try {
-            stmt = Service.connection.createStatement();
+            stmt = Service.getConnection().createStatement();
         } catch (SQLException sqlE) {
             System.out.println("Error creating statement object.");
             System.out.println(sqlE.getMessage());
@@ -172,12 +184,13 @@ public class UserService extends Service<Person> {
         }
     }
 
+    // Returns the number of users subscribed to the currently logged-in user.
     public Integer getNumberOfSubscribers() {
         String sqlGet = "SELECT COUNT(*) AS cnt FROM SUBSCRIBEDTO WHERE subscribedID = " + this.getLoggedUserID();
         ResultSet res;
 
         try {
-            Statement getStmt = Service.connection.createStatement();
+            Statement getStmt = Service.getConnection().createStatement();
             res = getStmt.executeQuery(sqlGet);
         } catch (SQLException sqlE) {
             System.out.println("Error getting number of subscribers for user with id = " + this.getLoggedUserID() + "!");
@@ -199,12 +212,13 @@ public class UserService extends Service<Person> {
         }
     }
 
+    // Returns the list of users the currently logged-in user is subscribed to.
     public List<Person> getPeopleSubscribedTo() {
         String sqlGet = "SELECT * FROM SUBSCRIBEDTO WHERE subscriberID = " + this.getLoggedUserID();
         ResultSet res;
 
         try {
-            Statement getStmt = Service.connection.createStatement();
+            Statement getStmt = Service.getConnection().createStatement();
             res = getStmt.executeQuery(sqlGet);
         } catch (SQLException sqlE) {
             System.out.println("Error getting people user with id = " + this.getLoggedUserID() + " is subscribed to!");
@@ -237,12 +251,13 @@ public class UserService extends Service<Person> {
         }
     }
 
+    // Returns a list of the posts created by the currently logged-in user.
     public List<Post> getOwnPosts() {
         String sqlGet = "SELECT * FROM POST WHERE posterID = " + this.getLoggedUserID();
         ResultSet res;
 
         try {
-            Statement getStmt = Service.connection.createStatement();
+            Statement getStmt = Service.getConnection().createStatement();
             res = getStmt.executeQuery(sqlGet);
         } catch (SQLException sqlE) {
             System.out.println("Error getting list of posts that user with id = " + this.getLoggedUserID() + " owns!");
@@ -275,12 +290,13 @@ public class UserService extends Service<Person> {
         }
     }
 
+    // Returns the view history of the currently logged-in user.
     public List<Post> getHistory() {
         String sqlGet = "SELECT * FROM HISTORY h JOIN POST p ON p.id = h.postID WHERE userID = " + this.getLoggedUserID() + " ORDER BY dateAccessed DESC";
         ResultSet res;
 
         try {
-            Statement getStmt = Service.connection.createStatement();
+            Statement getStmt = Service.getConnection().createStatement();
             res = getStmt.executeQuery(sqlGet);
         } catch (SQLException sqlE) {
             System.out.println("Error getting post history of user with id = " + this.getLoggedUserID() + "!");
@@ -312,6 +328,7 @@ public class UserService extends Service<Person> {
         }
     }
 
+    // Updates the account details of the currently logged-in user.
     public void updateDetails(Scanner sc) {
         System.out.println("Input the requested changes or nothing if you want to keep it:");
         System.out.print("Input new name: ");
@@ -342,7 +359,7 @@ public class UserService extends Service<Person> {
             int rowsUpdated;
 
             try {
-                Statement updateStmt = Service.connection.createStatement();
+                Statement updateStmt = Service.getConnection().createStatement();
                 rowsUpdated = updateStmt.executeUpdate(sqlUpdate);
                 if (rowsUpdated == 0) {
                     throw new SQLException("Password of user = " + this.getLoggedUserID() + " has not been updated!");
